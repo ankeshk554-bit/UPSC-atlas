@@ -1,0 +1,1644 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Sans:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  color-scheme: light;
+  --app-bg: #f8fafc;
+  --panel-bg: #ffffff;
+  --panel-border: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #9ca3af;
+  --sidebar-bg: #f1f5f9;
+  --sidebar-border: #e2e8f0;
+  --sidebar-hover: rgba(226, 232, 240, 0.8);
+  --sidebar-dark: #e2e8f0;
+  --sidebar-text: #0f172a;
+  --input-bg: #ffffff;
+  --accent: #3b82f6;
+}
+
+[data-theme="sepia"] {
+  color-scheme: light;
+  --app-bg: #f4ecd8;
+  --panel-bg: #fffaed;
+  --panel-border: #e5d9c5;
+  --text-main: #433422;
+  --text-muted: #786551;
+  --text-light: #a3947f;
+  --sidebar-bg: #eae0cd;
+  --sidebar-border: #e5d9c5;
+  --sidebar-hover: rgba(229, 217, 197, 0.6);
+  --sidebar-dark: #d5c8b2;
+  --sidebar-text: #433422;
+  --input-bg: #fffaed;
+  --accent: #d97706;
+}
+
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg: #121212;
+  --panel-bg: #1e1e1e;
+  --panel-border: #333333;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --text-light: #6b7280;
+  --sidebar-bg: #121212;
+  --sidebar-border: #333333;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-dark: #121212;
+  --sidebar-text: #e5e7eb;
+  --input-bg: #1e1e1e;
+  --accent: #3b82f6;
+}
+
+[data-theme="amoled"] {
+  color-scheme: dark;
+  --app-bg: #000000;
+  --panel-bg: #0a0a0a;
+  --panel-border: #1a1a1a;
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+  --sidebar-bg: #000000;
+  --sidebar-border: #1a1a1a;
+  --sidebar-hover: rgba(26, 26, 26, 0.5);
+  --sidebar-dark: #000000;
+  --sidebar-text: #e2e8f0;
+  --input-bg: #0a0a0a;
+  --accent: #8b5cf6;
+}
+
+[data-theme="nord"] {
+  color-scheme: dark;
+  --app-bg: #2e3440;
+  --panel-bg: #3b4252;
+  --panel-border: #4c566a;
+  --text-main: #eceff4;
+  --text-muted: #d8dee9;
+  --text-light: #94a3b8;
+  --sidebar-bg: #242933;
+  --sidebar-border: #3b4252;
+  --sidebar-hover: rgba(59, 66, 82, 0.5);
+  --sidebar-dark: #1e222a;
+  --sidebar-text: #e5e9f0;
+  --input-bg: #3b4252;
+  --accent: #88c0d0;
+}
+
+[data-theme="cyberpunk"] {
+  color-scheme: dark;
+  --app-bg: #0d0221;
+  --panel-bg: #000000;
+  --panel-border: #0ff0fc;
+  --text-main: #0ff0fc;
+  --text-muted: #f91880;
+  --text-light: #8a2be2;
+  --sidebar-bg: #0d0221;
+  --sidebar-border: #0ff0fc;
+  --sidebar-hover: rgba(15, 240, 252, 0.2);
+  --sidebar-dark: #000000;
+  --sidebar-text: #f91880;
+  --input-bg: #0d0221;
+  --accent: #f91880;
+}
+
+[data-theme="sunset"] {
+  color-scheme: light;
+  --app-bg: #fff1e6;
+  --panel-bg: #ffffff;
+  --panel-border: #ffecd1;
+  --text-main: #3d0c02;
+  --text-muted: #e85d04;
+  --text-light: #faa307;
+  --sidebar-bg: #ffecd1;
+  --sidebar-border: #ffb703;
+  --sidebar-hover: rgba(232, 93, 4, 0.1);
+  --sidebar-dark: #ffb703;
+  --sidebar-text: #9d0208;
+  --input-bg: #fff1e6;
+  --accent: #dc2f02;
+}
+
+[data-theme="ocean"] {
+  color-scheme: dark;
+  --app-bg: #0f172a;
+  --panel-bg: #1e293b;
+  --panel-border: #0ea5e9;
+  --text-main: #f0f9ff;
+  --text-muted: #38bdf8;
+  --text-light: #7dd3fc;
+  --sidebar-bg: #0f172a;
+  --sidebar-border: #0ea5e9;
+  --sidebar-hover: rgba(14, 165, 233, 0.2);
+  --sidebar-dark: #0284c7;
+  --sidebar-text: #bae6fd;
+  --input-bg: #1e293b;
+  --accent: #0ea5e9;
+}
+
+[data-theme="forest"] {
+  color-scheme: dark;
+  --app-bg: #143601;
+  --panel-bg: #1a4301;
+  --panel-border: #538d22;
+  --text-main: #e9f5db;
+  --text-muted: #aad576;
+  --text-light: #73a942;
+  --sidebar-bg: #143601;
+  --sidebar-border: #245501;
+  --sidebar-hover: rgba(83, 141, 34, 0.2);
+  --sidebar-dark: #1a4301;
+  --sidebar-text: #aad576;
+  --input-bg: #245501;
+  --accent: #538d22;
+}
+
+[data-theme="lavender"] {
+  color-scheme: light;
+  --app-bg: #f3e8ff;
+  --panel-bg: #faf5ff;
+  --panel-border: #d8b4fe;
+  --text-main: #3b0764;
+  --text-muted: #7e22ce;
+  --text-light: #a855f7;
+  --sidebar-bg: #f3e8ff;
+  --sidebar-border: #e9d5ff;
+  --sidebar-hover: rgba(168, 85, 247, 0.1);
+  --sidebar-dark: #d8b4fe;
+  --sidebar-text: #581c87;
+  --input-bg: #faf5ff;
+  --accent: #c084fc;
+}
+
+[data-theme="midnight"] {
+  color-scheme: dark;
+  --app-bg: #0b0f19;
+  --panel-bg: #111827;
+  --panel-border: #374151;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --text-light: #6b7280;
+  --sidebar-bg: #0b0f19;
+  --sidebar-border: #1f2937;
+  --sidebar-hover: rgba(55, 65, 81, 0.4);
+  --sidebar-dark: #1f2937;
+  --sidebar-text: #e5e7eb;
+  --input-bg: #111827;
+  --accent: #6366f1;
+}
+
+[data-theme="frost"] {
+  color-scheme: light;
+  --app-bg: #e0f2fe;
+  --panel-bg: #f0f9ff;
+  --panel-border: #bae6fd;
+  --text-main: #0c4a6e;
+  --text-muted: #0284c7;
+  --text-light: #38bdf8;
+  --sidebar-bg: #e0f2fe;
+  --sidebar-border: #bae6fd;
+  --sidebar-hover: rgba(186, 230, 253, 0.3);
+  --sidebar-dark: #7dd3fc;
+  --sidebar-text: #0369a1;
+  --input-bg: #f0f9ff;
+  --accent: #0284c7;
+}
+
+[data-theme="gruvbox"] {
+  color-scheme: dark;
+  --app-bg: #282828;
+  --panel-bg: #3c3836;
+  --panel-border: #504945;
+  --text-main: #ebdbb2;
+  --text-muted: #d5c4a1;
+  --text-light: #a89984;
+  --sidebar-bg: #282828;
+  --sidebar-border: #3c3836;
+  --sidebar-hover: rgba(80, 73, 69, 0.4);
+  --sidebar-dark: #1d2021;
+  --sidebar-text: #bdae93;
+  --input-bg: #32302f;
+  --accent: #fabd2f;
+}
+
+[data-theme="obsidian"] {
+  color-scheme: dark;
+  --app-bg: #0d0d0d;
+  --panel-bg: #141414;
+  --panel-border: #2b2b2b;
+  --text-main: #f0f0f0;
+  --text-muted: #a1a1a1;
+  --text-light: #5e5e5e;
+  --sidebar-bg: #0d0d0d;
+  --sidebar-border: #1a1a1a;
+  --sidebar-hover: rgba(43, 43, 43, 0.4);
+  --sidebar-dark: #000000;
+  --sidebar-text: #c2c2c2;
+  --input-bg: #1f1f1f;
+  --accent: #a366ff;
+}
+
+[data-theme="eink"] {
+  color-scheme: light;
+  --app-bg: #e5e5e5;
+  --panel-bg: #e5e5e5;
+  --panel-border: #c9c9c9;
+  --text-main: #111111;
+  --text-muted: #555555;
+  --text-light: #777777;
+  --sidebar-bg: #dddddd;
+  --sidebar-border: #c9c9c9;
+  --sidebar-hover: rgba(200, 200, 200, 0.5);
+  --sidebar-dark: #cccccc;
+  --sidebar-text: #333333;
+  --input-bg: #ebebeb;
+  --accent: #333333;
+}
+
+[data-theme="sage"] {
+  color-scheme: light;
+  --app-bg: #ecf3ef;
+  --panel-bg: #f5faf7;
+  --panel-border: #d3e2da;
+  --text-main: #1e2e25;
+  --text-muted: #526c5f;
+  --text-light: #809e90;
+  --sidebar-bg: #ecf3ef;
+  --sidebar-border: #d3e2da;
+  --sidebar-hover: rgba(211, 226, 218, 0.5);
+  --sidebar-dark: #d3e2da;
+  --sidebar-text: #1e2e25;
+  --input-bg: #f5faf7;
+  --accent: #10b981;
+}
+
+[data-theme="latte"] {
+  color-scheme: light;
+  --app-bg: #fcf7f2;
+  --panel-bg: #ffffff;
+  --panel-border: #f2e6dc;
+  --text-main: #2c221a;
+  --text-muted: #6e5a4e;
+  --text-light: #a08d81;
+  --sidebar-bg: #f6ece4;
+  --sidebar-border: #f2e6dc;
+  --sidebar-hover: rgba(242, 230, 220, 0.7);
+  --sidebar-dark: #ebded4;
+  --sidebar-text: #3a2f26;
+  --input-bg: #ffffff;
+  --accent: #d97706;
+}
+
+[data-theme="serenity"] {
+  color-scheme: light;
+  --app-bg: #eef2f6;
+  --panel-bg: #ffffff;
+  --panel-border: #dbe3eb;
+  --text-main: #2d3748;
+  --text-muted: #5a6a85;
+  --text-light: #8ca0ba;
+  --sidebar-bg: #e5ecf3;
+  --sidebar-border: #dbe3eb;
+  --sidebar-hover: rgba(219, 227, 235, 0.6);
+  --sidebar-dark: #cbd9e6;
+  --sidebar-text: #2d3748;
+  --input-bg: #f8fafc;
+  --accent: #5c8d83;
+}
+
+[data-theme="dracula"] {
+  color-scheme: dark;
+  --app-bg: #282a36;
+  --panel-bg: #44475a;
+  --panel-border: #6272a4;
+  --text-main: #f8f8f2;
+  --text-muted: #bfbfbf;
+  --text-light: #8be9fd;
+  --sidebar-bg: #282a36;
+  --sidebar-border: #6272a4;
+  --sidebar-hover: rgba(68, 71, 90, 0.7);
+  --sidebar-dark: #191a21;
+  --sidebar-text: #f8f8f2;
+  --input-bg: #282a36;
+  --accent: #bd93f9;
+}
+
+[data-theme="solarized-light"] {
+  color-scheme: light;
+  --app-bg: #fdf6e3;
+  --panel-bg: #eee8d5;
+  --panel-border: #93a1a1;
+  --text-main: #657b83;
+  --text-muted: #586e75;
+  --text-light: #93a1a1;
+  --sidebar-bg: #fdf6e3;
+  --sidebar-border: #93a1a1;
+  --sidebar-hover: rgba(238, 232, 213, 0.6);
+  --sidebar-dark: #eee8d5;
+  --sidebar-text: #657b83;
+  --input-bg: #fdf6e3;
+  --accent: #268bd2;
+}
+
+[data-theme="solarized-dark"] {
+  color-scheme: dark;
+  --app-bg: #002b36;
+  --panel-bg: #073642;
+  --panel-border: #586e75;
+  --text-main: #839496;
+  --text-muted: #93a1a1;
+  --text-light: #586e75;
+  --sidebar-bg: #002b36;
+  --sidebar-border: #586e75;
+  --sidebar-hover: rgba(7, 54, 66, 0.6);
+  --sidebar-dark: #002b36;
+  --sidebar-text: #839496;
+  --input-bg: #073642;
+  --accent: #2aa198;
+}
+
+[data-theme="tokyo-night"] {
+  color-scheme: dark;
+  --app-bg: #1a1b26;
+  --panel-bg: #24283b;
+  --panel-border: #414868;
+  --text-main: #c0caf5;
+  --text-muted: #a9b1d6;
+  --text-light: #565f89;
+  --sidebar-bg: #1a1b26;
+  --sidebar-border: #414868;
+  --sidebar-hover: rgba(36, 40, 59, 0.7);
+  --sidebar-dark: #15161e;
+  --sidebar-text: #c0caf5;
+  --input-bg: #1a1b26;
+  --accent: #7aa2f7;
+}
+
+[data-theme="high-contrast"] {
+  color-scheme: dark;
+  --app-bg: #000000;
+  --panel-bg: #000000;
+  --panel-border: #ffffff;
+  --text-main: #ffffff;
+  --text-muted: #cccccc;
+  --text-light: #aaaaaa;
+  --sidebar-bg: #000000;
+  --sidebar-border: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.2);
+  --sidebar-dark: #000000;
+  --sidebar-text: #ffffff;
+  --input-bg: #000000;
+  --accent: #ffff00;
+}
+
+@theme {
+  --color-app: var(--app-bg);
+  --color-panel: var(--panel-bg);
+  --color-panel-border: var(--panel-border);
+  --color-main: var(--text-main);
+  --color-muted: var(--text-muted);
+  --color-light: var(--text-light);
+  --color-sidebar: var(--sidebar-bg);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-dark: var(--sidebar-dark);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-input: var(--input-bg);
+  --color-accent: var(--accent);
+  --font-inter: "Inter", sans-serif;
+  --font-merriweather: "Merriweather", serif;
+  --font-lora: "Lora", serif;
+  --font-jetbrains: "JetBrains Mono", monospace;
+  --font-playfair: "Playfair Display", serif;
+  --font-georgia: "Georgia", serif;
+  --font-fira-sans: "Fira Sans", sans-serif;
+}
+
+.glass-panel {
+  background-color: color-mix(in srgb, var(--panel-bg) 40%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid color-mix(in srgb, var(--panel-border) 40%, transparent);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+}
+
+.glass-sidebar {
+  background-color: color-mix(in srgb, var(--sidebar-bg) 92%, transparent);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid color-mix(in srgb, var(--sidebar-border) 80%, transparent);
+}
+
+.glass-input {
+  background-color: color-mix(in srgb, var(--input-bg) 35%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--panel-border) 30%, transparent);
+}
+
+.glass-card {
+  background-color: color-mix(in srgb, var(--panel-bg) 30%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--panel-border) 25%, transparent);
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
+}
+
+[data-glass="false"] .glass-panel {
+  background-color: var(--panel-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--panel-border);
+  box-shadow: none;
+}
+
+[data-glass="false"] .glass-sidebar {
+  background-color: var(--sidebar-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-right: 1px solid var(--sidebar-border);
+}
+
+[data-glass="false"] .glass-input {
+  background-color: var(--input-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--panel-border);
+}
+
+[data-glass="false"] .glass-card {
+  background-color: var(--panel-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+
+.react-calendar-heatmap text {
+  font-size: 10px;
+  fill: var(--text-muted);
+}
+
+.react-calendar-heatmap .color-empty {
+  fill: var(--panel-border);
+}
+
+.react-calendar-heatmap .color-scale-1 {
+  fill: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.react-calendar-heatmap .color-scale-2 {
+  fill: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.react-calendar-heatmap .color-scale-3 {
+  fill: color-mix(in srgb, var(--accent) 80%, transparent);
+}
+.react-calendar-heatmap .color-scale-4 {
+  fill: var(--accent);
+}
+
+/* Dynamic theme overrides for Mermaid SVG charts */
+.mermaid-theme-override .mermaid-content svg {
+  background: transparent !important;
+  color: var(--text-main) !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.mermaid-theme-override foreignObject {
+  overflow: visible !important;
+}
+
+.mermaid-theme-override .node rect,
+.mermaid-theme-override .node circle,
+.mermaid-theme-override .node ellipse,
+.mermaid-theme-override .node polygon,
+.mermaid-theme-override .node path {
+  fill: var(--panel-bg) !important;
+  stroke: color-mix(in srgb, var(--panel-border) 60%, var(--text-main)) !important;
+  stroke-width: 2px !important;
+  rx: 8px !important;
+  ry: 8px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.02)) !important;
+}
+
+.mermaid-theme-override .node:hover rect,
+.mermaid-theme-override .node:hover circle,
+.mermaid-theme-override .node:hover ellipse,
+.mermaid-theme-override .node:hover polygon,
+.mermaid-theme-override .node:hover path {
+  fill: color-mix(in srgb, var(--accent) 6%, var(--panel-bg)) !important;
+  stroke: var(--accent) !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.08)) !important;
+  transform: translateY(-1px);
+}
+
+.mermaid-theme-override .node text,
+.mermaid-theme-override .node foreignObject div,
+.mermaid-theme-override .node foreignObject span,
+.mermaid-theme-override .node foreignObject p,
+.mermaid-theme-override .label {
+  fill: var(--text-main) !important;
+  color: var(--text-main) !important;
+  background-color: transparent !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+.mermaid-theme-override .node foreignObject div {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 6px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+  max-width: 400px !important;
+}
+
+.mermaid-theme-override .node foreignObject div span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+.mermaid-theme-override .edgeLabel,
+.mermaid-theme-override .edgeLabel foreignObject div,
+.mermaid-theme-override .edgeLabel foreignObject span,
+.mermaid-theme-override .edgeLabel foreignObject strong,
+.mermaid-theme-override .edgeLabel foreignObject b,
+.mermaid-theme-override .edgeLabel foreignObject em,
+.mermaid-theme-override .edgeLabel foreignObject i,
+.mermaid-theme-override .edgeLabel foreignObject p,
+.mermaid-theme-override .edgeLabel .label,
+.mermaid-theme-override .edgeLabel text {
+  background-color: var(--panel-bg) !important;
+  color: var(--text-muted) !important;
+  fill: var(--text-muted) !important;
+  font-family: var(--font-jetbrains) !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  border-radius: 4px !important;
+  padding: 2px 4px !important;
+}
+
+.mermaid-theme-override .edgeLabel rect {
+  fill: var(--panel-bg) !important;
+  rx: 4px !important;
+  ry: 4px !important;
+  stroke: var(--panel-border) !important;
+  stroke-width: 0.5px !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.03)) !important;
+}
+
+.mermaid-theme-override .edgePath .path,
+.mermaid-theme-override .edgePath path,
+.mermaid-theme-override .flowchart-link {
+  stroke: color-mix(in srgb, var(--text-muted) 85%, var(--text-main)) !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.mermaid-theme-override .edgePath:hover .path,
+.mermaid-theme-override .edgePath:hover path {
+  stroke: var(--accent) !important;
+  stroke-width: 2.5px !important;
+}
+
+.mermaid-theme-override marker path {
+  fill: color-mix(in srgb, var(--text-muted) 85%, var(--text-main)) !important;
+  stroke: none !important;
+}
+
+.mermaid-theme-override .edgePath:hover marker path {
+  fill: var(--accent) !important;
+}
+
+.mermaid-theme-override .cluster rect {
+  fill: color-mix(in srgb, var(--sidebar-bg) 20%, transparent) !important;
+  stroke: color-mix(in srgb, var(--panel-border) 80%, transparent) !important;
+  stroke-width: 1.5px !important;
+  rx: 16px !important;
+  ry: 16px !important;
+}
+
+.mermaid-theme-override .cluster text,
+.mermaid-theme-override .cluster foreignObject div,
+.mermaid-theme-override .cluster foreignObject span,
+.mermaid-theme-override .cluster .label {
+  fill: var(--text-main) !important;
+  color: var(--text-main) !important;
+  background-color: transparent !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* ==========================================================================
+   THEME SPECIFIC HIGH-CONTRAST MERMAID OVERRIDES (Serenity & Default)
+   ========================================================================== */
+
+/* --- 1. DEFAULT THEME OVERRIDES --- */
+:root:not([data-theme]) .mermaid-theme-override .node rect,
+:root:not([data-theme]) .mermaid-theme-override .node circle,
+:root:not([data-theme]) .mermaid-theme-override .node ellipse,
+:root:not([data-theme]) .mermaid-theme-override .node polygon,
+:root:not([data-theme]) .mermaid-theme-override .node path,
+[data-theme="default"] .mermaid-theme-override .node rect,
+[data-theme="default"] .mermaid-theme-override .node circle,
+[data-theme="default"] .mermaid-theme-override .node ellipse,
+[data-theme="default"] .mermaid-theme-override .node polygon,
+[data-theme="default"] .mermaid-theme-override .node path {
+  fill: #ffffff !important;
+  stroke: #475569 !important; /* Bold high-contrast charcoal border */
+  stroke-width: 2.2px !important;
+}
+
+/* Diamonds/Decisions (polygon or dedicated classes) */
+:root:not([data-theme]) .mermaid-theme-override .node polygon,
+:root:not([data-theme]) .mermaid-theme-override .node .diamond,
+[data-theme="default"] .mermaid-theme-override .node polygon,
+[data-theme="default"] .mermaid-theme-override .node .diamond {
+  fill: #eff6ff !important; /* Soft energetic blue context background */
+  stroke: #2563eb !important; /* Rich cognitive blue border */
+  stroke-width: 2.5px !important;
+}
+
+/* Circles/Ellipses (Start/End points or core hubs) */
+:root:not([data-theme]) .mermaid-theme-override .node circle,
+:root:not([data-theme]) .mermaid-theme-override .node ellipse,
+[data-theme="default"] .mermaid-theme-override .node circle,
+[data-theme="default"] .mermaid-theme-override .node ellipse {
+  fill: #f8fafc !important; /* Clean gray panel background */
+  stroke: #1e293b !important;
+  stroke-width: 2.2px !important;
+}
+
+/* Node Hover States */
+:root:not([data-theme]) .mermaid-theme-override .node:hover rect,
+:root:not([data-theme]) .mermaid-theme-override .node:hover circle,
+:root:not([data-theme]) .mermaid-theme-override .node:hover ellipse,
+:root:not([data-theme]) .mermaid-theme-override .node:hover polygon,
+:root:not([data-theme]) .mermaid-theme-override .node:hover path,
+[data-theme="default"] .mermaid-theme-override .node:hover rect,
+[data-theme="default"] .mermaid-theme-override .node:hover circle,
+[data-theme="default"] .mermaid-theme-override .node:hover ellipse,
+[data-theme="default"] .mermaid-theme-override .node:hover polygon,
+[data-theme="default"] .mermaid-theme-override .node:hover path {
+  fill: #e0f2fe !important; /* Vibrant hover selection */
+  stroke: #1d4ed8 !important;
+  stroke-width: 2.8px !important;
+  filter: drop-shadow(0 6px 16px rgba(37, 99, 235, 0.15)) !important;
+}
+
+/* Distinct Edges styling based on relationship categories */
+/* A. Thick/Double Arrow Edges (Primary Critical Path / Active Governance Reforms / Main Progressions) */
+:root:not([data-theme]) .mermaid-theme-override .edgePath.edge-thickness-thick path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath.edge-thickness-thick .path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath path[stroke-width="3"],
+:root:not([data-theme]) .mermaid-theme-override .edgePath path[style*="stroke-width: 3"],
+:root:not([data-theme]) .mermaid-theme-override .edgePath path[style*="stroke-width:3"],
+[data-theme="default"] .mermaid-theme-override .edgePath.edge-thickness-thick path,
+[data-theme="default"] .mermaid-theme-override .edgePath.edge-thickness-thick .path,
+[data-theme="default"] .mermaid-theme-override .edgePath path[stroke-width="3"],
+[data-theme="default"] .mermaid-theme-override .edgePath path[style*="stroke-width: 3"],
+[data-theme="default"] .mermaid-theme-override .edgePath path[style*="stroke-width:3"] {
+  stroke: #2563eb !important; /* Royal Blue */
+  stroke-width: 3.5px !important;
+}
+
+/* B. Labeled / Standard Solid Line Connector (Functional progressions/links) */
+:root:not([data-theme]) .mermaid-theme-override .edgePath:not(.edge-pattern-dashed):not(.edge-pattern-dotted):not(.edge-thickness-thick) path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath:not(.edge-pattern-dashed):not(.edge-pattern-dotted):not(.edge-thickness-thick) .path,
+[data-theme="default"] .mermaid-theme-override .edgePath:not(.edge-pattern-dashed):not(.edge-pattern-dotted):not(.edge-thickness-thick) path,
+[data-theme="default"] .mermaid-theme-override .edgePath:not(.edge-pattern-dashed):not(.edge-pattern-dotted):not(.edge-thickness-thick) .path {
+  stroke: #1e293b !important; /* Deep coal highlight */
+  stroke-width: 2px !important;
+}
+
+/* C. Dashed / Dotted Connector (Feedback loops, dependencies, system reactions, interconnected blocks) */
+:root:not([data-theme]) .mermaid-theme-override .edgePath.edge-pattern-dashed path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath.edge-pattern-dashed .path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath.edge-pattern-dotted path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath.edge-pattern-dotted .path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath path[style*="stroke-dasharray"],
+:root:not([data-theme]) .mermaid-theme-override .edgePath path[stroke-dasharray],
+[data-theme="default"] .mermaid-theme-override .edgePath.edge-pattern-dashed path,
+[data-theme="default"] .mermaid-theme-override .edgePath.edge-pattern-dashed .path,
+[data-theme="default"] .mermaid-theme-override .edgePath.edge-pattern-dotted path,
+[data-theme="default"] .mermaid-theme-override .edgePath.edge-pattern-dotted .path,
+[data-theme="default"] .mermaid-theme-override .edgePath path[style*="stroke-dasharray"],
+[data-theme="default"] .mermaid-theme-override .edgePath path[stroke-dasharray] {
+  stroke: #c2410c !important; /* Hot terracotta/rust for attention and feedback */
+  stroke-width: 2.2px !important;
+  stroke-dasharray: 6, 4 !important;
+}
+
+/* Edge Hovering */
+:root:not([data-theme]) .mermaid-theme-override .edgePath:hover path,
+:root:not([data-theme]) .mermaid-theme-override .edgePath:hover .path,
+[data-theme="default"] .mermaid-theme-override .edgePath:hover path,
+[data-theme="default"] .mermaid-theme-override .edgePath:hover .path {
+  stroke: #1d4ed8 !important;
+  stroke-width: 3.5px !important;
+}
+
+/* Arrowheads (markers) */
+:root:not([data-theme]) .mermaid-theme-override marker path,
+[data-theme="default"] .mermaid-theme-override marker path {
+  fill: #1e293b !important;
+}
+
+:root:not([data-theme]) .mermaid-theme-override .edgePath:hover marker path,
+[data-theme="default"] .mermaid-theme-override .edgePath:hover marker path {
+  fill: #1d4ed8 !important;
+}
+
+/* Edge labels */
+:root:not([data-theme]) .mermaid-theme-override .edgeLabel foreignObject div,
+[data-theme="default"] .mermaid-theme-override .edgeLabel foreignObject div {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  font-family: var(--font-jetbrains) !important;
+  background-color: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  padding: 2px 6px !important;
+}
+
+
+/* --- 2. SERENITY THEME OVERRIDES --- */
+[data-theme="serenity"] .mermaid-theme-override .node rect,
+[data-theme="serenity"] .mermaid-theme-override .node circle,
+[data-theme="serenity"] .mermaid-theme-override .node ellipse,
+[data-theme="serenity"] .mermaid-theme-override .node polygon,
+[data-theme="serenity"] .mermaid-theme-override .node path {
+  fill: #ffffff !important;
+  stroke: #2d3748 !important; /* Rich serenity charcoal border */
+  stroke-width: 2.2px !important;
+}
+
+/* Diamonds/Decisions for Serenity */
+[data-theme="serenity"] .mermaid-theme-override .node polygon,
+[data-theme="serenity"] .mermaid-theme-override .node .diamond {
+  fill: #f0fdf4 !important; /* Emerald green tint */
+  stroke: #0f766e !important; /* Deep signature teal */
+  stroke-width: 2.5px !important;
+}
+
+/* Circles/Ellipses for Serenity */
+[data-theme="serenity"] .mermaid-theme-override .node circle,
+[data-theme="serenity"] .mermaid-theme-override .node ellipse {
+  fill: #f1f5f9 !important;
+  stroke: #1e293b !important;
+  stroke-width: 2.2px !important;
+}
+
+/* Hover States for Serenity nodes */
+[data-theme="serenity"] .mermaid-theme-override .node:hover rect,
+[data-theme="serenity"] .mermaid-theme-override .node:hover circle,
+[data-theme="serenity"] .mermaid-theme-override .node:hover ellipse,
+[data-theme="serenity"] .mermaid-theme-override .node:hover polygon,
+[data-theme="serenity"] .mermaid-theme-override .node:hover path {
+  fill: #f0fdfa !important; /* Teal tint on hover */
+  stroke: #0d9488 !important; /* Serenity bright teal */
+  stroke-width: 2.8px !important;
+  filter: drop-shadow(0 6px 16px rgba(13, 148, 136, 0.15)) !important;
+}
+
+/* Distinct Edges styling based on relationship categories - Serenity */
+/* A. Thick/Double Arrow Edges (Primary Critical Path / Active Governance Reforms / Main Progressions) */
+[data-theme="serenity"] .mermaid-theme-override .edgePath.edge-thickness-thick path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath.edge-thickness-thick .path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath path[stroke-width="3"],
+[data-theme="serenity"] .mermaid-theme-override .edgePath path[style*="stroke-width: 3"],
+[data-theme="serenity"] .mermaid-theme-override .edgePath path[style*="stroke-width:3"] {
+  stroke: #0f766e !important; /* Vibrant signature teal and highly contrasting */
+  stroke-width: 3.5px !important;
+}
+
+/* B. Labeled / Standard Solid Line Connector (Functional progressions/links) */
+[data-theme="serenity"] .mermaid-theme-override .edgePath:not(.edge-pattern-dashed):not(.edge-pattern-dotted):not(.edge-thickness-thick) path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath:not(.edge-pattern-dashed):not(.edge-pattern-dotted):not(.edge-thickness-thick) .path {
+  stroke: #2d3748 !important; /* Spruce/Charcoal balance */
+  stroke-width: 2px !important;
+}
+
+/* C. Dashed / Dotted Connector (Feedback loops, dependencies, system reactions, interconnected blocks) */
+[data-theme="serenity"] .mermaid-theme-override .edgePath.edge-pattern-dashed path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath.edge-pattern-dashed .path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath.edge-pattern-dotted path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath.edge-pattern-dotted .path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath path[style*="stroke-dasharray"],
+[data-theme="serenity"] .mermaid-theme-override .edgePath path[stroke-dasharray] {
+  stroke: #be123c !important; /* Energetic deep wine crimson for beautiful conceptual contrast */
+  stroke-width: 2.2px !important;
+  stroke-dasharray: 6, 4 !important;
+}
+
+/* Edge Hovering */
+[data-theme="serenity"] .mermaid-theme-override .edgePath:hover path,
+[data-theme="serenity"] .mermaid-theme-override .edgePath:hover .path {
+  stroke: #0d9488 !important;
+  stroke-width: 3.5px !important;
+}
+
+/* Arrowheads (markers) */
+[data-theme="serenity"] .mermaid-theme-override marker path {
+  fill: #2d3748 !important;
+}
+
+[data-theme="serenity"] .mermaid-theme-override .edgePath:hover marker path {
+  fill: #0d9488 !important;
+}
+
+/* Edge labels */
+[data-theme="serenity"] .mermaid-theme-override .edgeLabel foreignObject div {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  font-family: var(--font-jetbrains) !important;
+  background-color: #f0fdfa !important;
+  border: 1.5px solid #99f6e4 !important;
+  padding: 2px 6px !important;
+}
+
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  /* Ensure chart colors don't disappear/invert in print mode */
+  .mermaid-theme-override {
+    --text-main: #000000 !important;
+    --panel-bg: #ffffff !important;
+    --panel-border: #cbd5e1 !important;
+    --text-muted: #475569 !important;
+    --sidebar-bg: #f8fafc !important;
+  }
+
+  /* Prevent page content/charts from being cut */
+  .mermaid, .mermaid-chart-container, img, svg {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    display: block !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .mermaid-theme-override .mermaid-content svg {
+    max-width: none !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .prose {
+    max-width: none !important;
+  }
+
+  p, h1, h2, h3, h4, li, pre, blockquote, table, tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Ensure full rendering */
+  .print\:overflow-visible {
+    overflow: visible !important;
+    height: auto !important;
+    position: static !important;
+  }
+
+  #root, body, html {
+    overflow: visible !important;
+    height: auto !important;
+    position: static !important;
+    display: block !important;
+  }
+}
+
+.prose pre:has(.mermaid) {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-wrapper {
+  font-size: 14px;
+}
+
+/* Ensure chart colors don't disappear/invert in PDF export mode */
+.pdf-export-wrapper .mermaid-theme-override {
+  --text-main: #000000 !important;
+  --panel-bg: #ffffff !important;
+  --panel-border: #cbd5e1 !important;
+  --text-muted: #475569 !important;
+  --sidebar-bg: #f8fafc !important;
+}
+
+.pdf-export-wrapper .mermaid {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  max-width: none !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.pdf-export-wrapper .mermaid-theme-override .mermaid-content svg {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.pdf-export-wrapper .prose {
+  color: black;
+  max-width: none;
+  --tw-prose-body: black;
+  --tw-prose-headings: black;
+  --tw-prose-lead: black;
+  --tw-prose-links: black;
+  --tw-prose-bold: black;
+  --tw-prose-counters: black;
+  --tw-prose-bullets: black;
+  --tw-prose-hr: #e5e7eb;
+  --tw-prose-quotes: black;
+  --tw-prose-quote-borders: #e5e7eb;
+  --tw-prose-captions: black;
+  --tw-prose-code: black;
+  --tw-prose-pre-code: black;
+  --tw-prose-pre-bg: #f9fafb;
+}
+
+.pdf-export-wrapper p, 
+.pdf-export-wrapper li, 
+.pdf-export-wrapper h1, 
+.pdf-export-wrapper h2, 
+.pdf-export-wrapper h3, 
+.pdf-export-wrapper h4,
+.pdf-export-wrapper blockquote {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--app-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--panel-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}
+
+/* 
+ * Long-Duration Study Ergonomics & Dynamic Customizations
+ * Reduces eye-fatigue under standard fluorescent or evening lighting.
+ */
+body {
+  background-color: var(--app-bg);
+  color: var(--text-main);
+  font-family: var(--dynamic-font-family, var(--font-inter), sans-serif);
+  font-size: var(--dynamic-font-size, 1rem);
+  line-height: var(--dynamic-line-height, 1.55);
+  filter: var(--dynamic-text-contrast-filter, none);
+  transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              color 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.35s ease;
+  -webkit-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  
+}
+
+/* Ambient Eye-Comfort Warmth Tint (mimics TrueTone or Evening Dimmer) */
+body::after {
+  content: "";
+  display: block;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-color: var(--dynamic-eye-saver-tint, transparent);
+  mix-blend-mode: multiply;
+  z-index: 999999;
+  transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Selective typography pairing: block prose utilizes the user's customized serif or sans choice */
+.prose, .markdown-body, .reading-prose, .notes-rich-content, .data-bank-content, .current-affairs-reader {
+  font-family: var(--dynamic-font-family, var(--font-inter), sans-serif) !important;
+  font-size: var(--dynamic-font-size, 1rem) !important;
+  line-height: var(--dynamic-line-height, 1.6) !important;
+}
+
+/* Erudite Typography: Highly Differentiated Headings for Deep Reading & Clear Structure */
+.prose h1, .markdown-body h1, .current-affairs-reader h1 {
+  font-size: 2.25rem !important;
+  font-weight: 900 !important;
+  color: var(--text-main) !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.15 !important;
+  margin-top: 2.5rem !important;
+  margin-bottom: 1.25rem !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 50%, transparent) !important;
+}
+
+.prose h2, .markdown-body h2, .current-affairs-reader h2 {
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  color: var(--text-main) !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.25 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 80%, transparent) !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.prose h3, .markdown-body h3, .current-affairs-reader h3 {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.3 !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 0.75rem !important;
+  border-left: 4px solid color-mix(in srgb, var(--accent) 70%, transparent) !important;
+  padding-left: 0.75rem !important;
+}
+
+.prose h4, .markdown-body h4, .current-affairs-reader h4 {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: var(--accent) !important;
+  letter-spacing: 0.02em !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.65rem !important;
+}
+
+.prose h5, .markdown-body h5, .current-affairs-reader h5 {
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: var(--text-main) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+  opacity: 0.85;
+}
+
+.prose h6, .markdown-body h6, .current-affairs-reader h6 {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Paragraph spacing inside premium prose */
+.prose p, .markdown-body p, .current-affairs-reader p {
+  margin-top: 0.85rem !important;
+  margin-bottom: 0.85rem !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  opacity: 0.92;
+}
+
+/* Ordered and unordered study lists */
+.prose ul, .markdown-body ul, .current-affairs-reader ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.prose ol, .markdown-body ol, .current-affairs-reader ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.prose li, .markdown-body li, .current-affairs-reader li {
+  margin-top: 0.35rem !important;
+  margin-bottom: 0.35rem !important;
+  line-height: 1.6 !important;
+}
+
+/* Enhancements for Concept Notes / Content layout */
+.prose blockquote, .markdown-body blockquote, .current-affairs-reader blockquote {
+  border-left: 4px solid var(--accent) !important;
+  background-color: color-mix(in srgb, var(--accent) 5%, transparent) !important;
+  padding: 1rem 1.25rem !important;
+  margin-top: 1.2rem !important;
+  margin-bottom: 1.2rem !important;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  font-style: italic !important;
+  color: var(--text-main) !important;
+  opacity: 0.95;
+}
+
+.prose strong, .markdown-body strong, .current-affairs-reader strong {
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+  background-color: color-mix(in srgb, var(--accent) 8%, transparent);
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.prose hr, .markdown-body hr, .current-affairs-reader hr {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, transparent, color-mix(in srgb, var(--panel-border) 80%, transparent), transparent);
+  margin: 2.5rem 0 !important;
+}
+
+.prose table, .markdown-body table, .current-affairs-reader table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  font-size: 0.95em !important;
+}
+
+.prose th, .markdown-body th, .current-affairs-reader th {
+  border: 1px solid color-mix(in srgb, var(--panel-border) 60%, transparent) !important;
+  padding: 0.75rem 1rem !important;
+  background-color: color-mix(in srgb, var(--input-bg) 60%, transparent) !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+}
+
+.prose td, .markdown-body td, .current-affairs-reader td {
+  border: 1px solid color-mix(in srgb, var(--panel-border) 40%, transparent) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.prose tr:nth-child(even), .markdown-body tr:nth-child(even), .current-affairs-reader tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--input-bg) 20%, transparent) !important;
+}
+
+.prose ul, .markdown-body ul, .current-affairs-reader ul {
+  list-style-type: none !important;
+  padding-left: 0.25rem !important;
+}
+
+.prose ul > li, .markdown-body ul > li, .current-affairs-reader ul > li {
+  position: relative;
+  padding-left: 1.25rem !important;
+}
+
+.prose ul > li::before, .markdown-body ul > li::before, .current-affairs-reader ul > li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 1.2em;
+  line-height: 1;
+  top: 0.1rem;
+}
+
+.prose ol, .markdown-body ol, .current-affairs-reader ol {
+  padding-left: 1.25rem !important;
+}
+
+.prose ol > li::marker, .markdown-body ol > li::marker, .current-affairs-reader ol > li::marker {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.prose code, .markdown-body code, .current-affairs-reader code {
+  background-color: color-mix(in srgb, var(--input-bg) 60%, transparent);
+  color: var(--accent) !important;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 40%, transparent);
+}
+
+.prose pre, .markdown-body pre, .current-affairs-reader pre {
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--panel-border) !important;
+  border-radius: 0.5rem !important;
+  padding: 1.25rem !important;
+  overflow-x: auto !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+}
+
+.prose pre code, .markdown-body pre code, .current-affairs-reader pre code {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--text-main) !important;
+}
+
+.prose img, .markdown-body img, .current-affairs-reader img {
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--text-main) 10%, transparent);
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+  max-width: 100% !important;
+}
+
+
+/* Stable UI components keep crisp geometric sans for clean alignment */
+button, nav, sidebar, [role="tab"], .font-inter-only {
+  font-family: var(--font-inter), "Inter", sans-serif !important;
+}
+
+/* Subtle pulse border highlight for focused interactive elements */
+textarea:focus, input[type="text"]:focus, select:focus {
+  outline: none;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent) !important;
+}
+
+/* Polished transition properties for all standard applet panels */
+.glass-panel, .glass-card, .glass-sidebar {
+  transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover, .glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Explicit font-family utility classes to bypass framework loading nuances */
+.font-inter { font-family: var(--font-inter), "Inter", sans-serif !important; }
+.font-merriweather { font-family: var(--font-merriweather), "Merriweather", serif !important; }
+.font-lora { font-family: var(--font-lora), "Lora", serif !important; }
+.font-jetbrains { font-family: var(--font-jetbrains), "JetBrains Mono", monospace !important; }
+.font-playfair { font-family: var(--font-playfair), "Playfair Display", serif !important; }
+.font-georgia { font-family: var(--font-georgia), "Georgia", serif !important; }
+.font-fira-sans { font-family: var(--font-fira-sans), "Fira Sans", sans-serif !important; }
+
+/* RSS Reader Specific Typography overrides to ensure correct font and size reactivity */
+article.rss-reader-article {
+  font-size: var(--rss-reader-font-size, 0.95rem) !important;
+}
+
+/* Ensure font family carries over dynamically across children */
+article.rss-reader-article :not(pre, code, pre *, code *, button, .font-mono, [class*="font-mono"]) {
+  font-family: inherit !important;
+}
+
+/* Base text sizing: inherit font-size from parent container precisely to avoid duplication or compounding */
+article.rss-reader-article .prose {
+  font-size: var(--rss-reader-font-size, 1rem) !important;
+}
+
+article.rss-reader-article p,
+article.rss-reader-article li,
+article.rss-reader-article blockquote,
+article.rss-reader-article td,
+article.rss-reader-article th,
+article.rss-reader-article .prose p,
+article.rss-reader-article .prose li,
+article.rss-reader-article .prose td,
+article.rss-reader-article .prose th,
+article.rss-reader-article .prose blockquote,
+article.rss-reader-article .prose div {
+  font-size: var(--rss-reader-font-size, 1rem) !important;
+  line-height: 1.75 !important;
+}
+
+/* Highlight and Bold Preservation: Never let overrides strip the strong style */
+article.rss-reader-article strong,
+article.rss-reader-article strong *,
+article.rss-reader-article b,
+article.rss-reader-article b *,
+article.rss-reader-article .font-bold,
+article.rss-reader-article .font-bold * {
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+}
+
+/* Elegant Magazine-style Headings for the RSS Reader */
+article.rss-reader-article h1,
+article.rss-reader-article .prose h1 {
+  display: block !important;
+  font-size: 2.2em !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.03em !important;
+  margin-top: 1.8em !important;
+  margin-bottom: 0.8em !important;
+  color: var(--text-main) !important;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 40%, transparent) !important;
+  padding-bottom: 0.4em !important;
+  font-family: var(--font-serif, "Playfair Display", "Lora", serif) !important;
+}
+
+article.rss-reader-article h2,
+article.rss-reader-article .prose h2 {
+  display: block !important;
+  font-size: 1.6em !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
+  margin-top: 1.6em !important;
+  margin-bottom: 0.7em !important;
+  color: var(--text-main) !important;
+  border-left: 4px solid var(--accent) !important;
+  padding-left: 0.8em !important;
+}
+
+article.rss-reader-article h3,
+article.rss-reader-article .prose h3 {
+  display: block !important;
+  font-size: 1.3em !important;
+  font-weight: 750 !important;
+  line-height: 1.3 !important;
+  margin-top: 1.5em !important;
+  margin-bottom: 0.6em !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px dashed color-mix(in srgb, var(--panel-border) 80%, transparent) !important;
+  padding-bottom: 0.4em !important;
+}
+
+article.rss-reader-article h4,
+article.rss-reader-article .prose h4 {
+  display: inline-block !important;
+  font-size: 1em !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  margin-top: 1.4em !important;
+  margin-bottom: 0.5em !important;
+  color: var(--text-main) !important;
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  padding: 0.2em 0.6em !important;
+  border-radius: 0.25rem !important;
+}
+
+article.rss-reader-article h5,
+article.rss-reader-article .prose h5,
+article.rss-reader-article h6,
+article.rss-reader-article .prose h6 {
+  display: block !important;
+  font-size: 0.95em !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin-top: 1.2em !important;
+  margin-bottom: 0.4em !important;
+  color: var(--text-muted) !important;
+}
+
+/* Ensure all children of headings inherit styles cleanly without compounding layout side-effects */
+article.rss-reader-article h1 *,
+article.rss-reader-article h2 *,
+article.rss-reader-article h3 *,
+article.rss-reader-article h4 * {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  border-left: none !important;
+  border-bottom: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline !important;
+}
+
+/* Code Blocks and Syntax Highlighting inside RSS Reader */
+article.rss-reader-article pre {
+  background-color: color-mix(in srgb, var(--bg-main) 95%, black) !important; /* Context-aware background */
+  color: var(--text-main) !important;
+  border-radius: 0.5rem !important;
+  padding: 1.25rem !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  overflow-x: auto !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent) !important;
+  tab-size: 4 !important;
+  font-family: var(--font-mono, "JetBrains Mono", "Fira Code", monospace) !important;
+  font-size: 0.85em !important;
+  line-height: 1.6 !important;
+}
+
+.dark article.rss-reader-article pre {
+  background-color: #1e1e1e !important;
+  color: #e4e4e7 !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+article.rss-reader-article pre code {
+  color: inherit !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  border: none !important;
+}
+
+/* Inline code */
+article.rss-reader-article :not(pre) > code {
+  background-color: color-mix(in srgb, var(--accent) 15%, transparent) !important;
+  color: var(--accent) !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.85em !important;
+  font-family: var(--font-mono, "JetBrains Mono", "Fira Code", monospace) !important;
+}
+
+/* Common Syntax Highlighting Tokens (Minimal, Eye-Friendly Palette) */
+article.rss-reader-article pre .keyword,
+article.rss-reader-article pre .hljs-keyword,
+article.rss-reader-article pre .token.keyword { color: #c678dd !important; }
+
+article.rss-reader-article pre .string,
+article.rss-reader-article pre .hljs-string,
+article.rss-reader-article pre .token.string { color: #98c379 !important; }
+
+article.rss-reader-article pre .number,
+article.rss-reader-article pre .hljs-number,
+article.rss-reader-article pre .token.number { color: #d19a66 !important; }
+
+article.rss-reader-article pre .function,
+article.rss-reader-article pre .hljs-title.function_,
+article.rss-reader-article pre .token.function { color: #61afef !important; }
+
+article.rss-reader-article pre .comment,
+article.rss-reader-article pre .hljs-comment,
+article.rss-reader-article pre .token.comment { color: #7f848e !important; font-style: italic !important; }
+
+article.rss-reader-article pre .variable,
+article.rss-reader-article pre .hljs-variable,
+article.rss-reader-article pre .token.variable,
+article.rss-reader-article pre .token.property { color: #e06c75 !important; }
+
+article.rss-reader-article pre .operator,
+article.rss-reader-article pre .hljs-operator,
+article.rss-reader-article pre .token.operator { color: #56b6c2 !important; }
+
+article.rss-reader-article pre .class-name,
+article.rss-reader-article pre .hljs-title.class_,
+article.rss-reader-article pre .token.class-name { color: #e5c07b !important; }
+
+article.rss-reader-article pre .punctuation,
+article.rss-reader-article pre .hljs-punctuation,
+article.rss-reader-article pre .token.punctuation { color: #abb2bf !important; }
+
+/* Elegant Image and Caption Presentation */
+article.rss-reader-article img {
+  border-radius: 0.75rem !important;
+  box-shadow: 0 8px 25px -5px color-mix(in srgb, var(--text-main) 12%, transparent) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin-top: 2.5em !important;
+  margin-bottom: 1em !important;
+}
+
+/* Ensure figure captions and any div with caption classes are elegant and distinct from the main article text */
+article.rss-reader-article figure > p,
+article.rss-reader-article figure > figcaption,
+article.rss-reader-article .caption,
+article.rss-reader-article .wp-caption,
+article.rss-reader-article .wp-caption-text,
+article.rss-reader-article .has-text-align-center {
+  display: block !important;
+  text-align: center !important;
+  font-size: 0.8rem !important;
+  font-style: italic !important;
+  font-family: var(--font-inter, sans-serif) !important;
+  color: var(--text-muted) !important;
+  margin-top: 0.5em !important;
+  margin-bottom: 2em !important;
+  line-height: 1.4 !important;
+  padding-inline: 15% !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 60%, transparent) !important;
+  padding-bottom: 1em !important;
+  opacity: 0.8 !important;
+}
+
+article.rss-reader-article figure {
+  margin: 2.5em auto !important;
+  text-align: center !important;
+}
+
+article.rss-reader-article figure img {
+  margin-top: 0 !important;
+  margin-bottom: 1em !important;
+}
+
+article.rss-reader-article figcaption,
+article.rss-reader-article .wp-caption-text,
+article.rss-reader-article .caption {
+  display: block !important;
+  text-align: center !important;
+  font-size: 0.85em !important;
+  font-style: italic !important;
+  color: var(--text-muted) !important;
+  margin-top: 0.75em !important;
+  margin-bottom: 2.5em !important;
+  line-height: 1.5 !important;
+  padding-inline: 2em !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 50%, transparent) !important;
+  padding-bottom: 1.5em !important;
+}
+
+/* Sometimes captions are just small text after an image */
+article.rss-reader-article img + em,
+article.rss-reader-article img + i {
+  display: block !important;
+  text-align: center !important;
+  font-size: 0.85em !important;
+  color: var(--text-muted) !important;
+  margin-top: -0.5em !important;
+  margin-bottom: 2em !important;
+  padding-bottom: 1em !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 50%, transparent) !important;
+}
+
+
+.prose iframe, .prose video {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  aspect-ratio: 16/9;
+}
+
+[data-theme="white"] {
+  color-scheme: light;
+  --app-bg: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-border: #e5e5e5;
+  --text-main: #000000;
+  --text-muted: #555555;
+  --text-light: #888888;
+  --sidebar-bg: #f9f9f9;
+  --sidebar-border: #e5e5e5;
+  --sidebar-hover: #eeeeee;
+  --sidebar-dark: #dddddd;
+  --sidebar-text: #000000;
+  --input-bg: #ffffff;
+  --accent: #2563eb;
+}
+
+/* iOS/iPadOS specific text sharpness */
+@supports (-webkit-touch-callout: none) {
+  body {
+    -webkit-font-smoothing: antialiased !important;
+    text-rendering: optimizeLegibility !important;
+    font-weight: 500;
+  }
+  
+  article.rss-reader-article p,
+  article.rss-reader-article li,
+  article.rss-reader-article .prose p,
+  article.rss-reader-article .prose li {
+    color: var(--text-main) !important;
+    opacity: 0.95;
+    font-weight: 400; /* Revert to standard for readability, but keep color sharp */
+  }
+}

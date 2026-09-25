@@ -1,0 +1,6 @@
+{
+  "name": "UPSC Workspace",
+  "description": "Comprehensive UPSC and Law Optional preparation assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

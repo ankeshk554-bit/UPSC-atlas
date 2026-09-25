@@ -1,0 +1,16 @@
+{
+  "name": "UPSC Workspace",
+  "short_name": "UPSC Workspace",
+  "description": "UPSC Preparation Workspace & RSS Reader",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
