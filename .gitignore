@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+.npm-cache/
+.test-build/
+.review-workspace
+*.service-account.json

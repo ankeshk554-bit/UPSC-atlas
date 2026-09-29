@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Sparkles,
@@ -684,7 +685,7 @@ export function AnswerBlueprintView({ model }: { model: DeepSeekModel }) {
     `;
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -825,7 +826,7 @@ export function AnswerBlueprintView({ model }: { model: DeepSeekModel }) {
     `;
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -927,7 +928,7 @@ export function AnswerBlueprintView({ model }: { model: DeepSeekModel }) {
     setIsGeneratingBrainstorm(true);
 
     try {
-      const res = await fetch("/api/brainstorm-generate", {
+      const res = await apiFetch("/api/brainstorm-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -962,7 +963,7 @@ export function AnswerBlueprintView({ model }: { model: DeepSeekModel }) {
 
     try {
       setDiagramError(null);
-      const res = await fetch("/api/diagrams-generate", {
+      const res = await apiFetch("/api/diagrams-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1294,7 +1295,7 @@ export function AnswerBlueprintView({ model }: { model: DeepSeekModel }) {
     `;
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

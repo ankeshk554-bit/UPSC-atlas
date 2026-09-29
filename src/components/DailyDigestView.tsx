@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect } from 'react';
 import { Mail, Sparkles, RefreshCw, Calendar, Loader2, AlertTriangle, Brain, Filter, CheckCircle2, ArrowRight } from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -320,7 +321,7 @@ export function DailyDigestView({ model, onNavigate }: DailyDigestViewProps = {}
       : flattened.slice(0, 15).map(t => t.title);
 
     try {
-      const resp = await fetch("/api/rss-syllabus-match", {
+      const resp = await apiFetch("/api/rss-syllabus-match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -434,7 +435,7 @@ export function DailyDigestView({ model, onNavigate }: DailyDigestViewProps = {}
 
   const extractItemsFromFeed = async (url: string) => {
     try {
-      const resp = await fetch(`/api/rss-proxy?url=${encodeURIComponent(url)}`);
+      const resp = await apiFetch(`/api/rss-proxy?url=${encodeURIComponent(url)}`);
       let parsedItems: any[] = [];
       if (resp.ok) {
         const data = await resp.json();
@@ -502,7 +503,7 @@ export function DailyDigestView({ model, onNavigate }: DailyDigestViewProps = {}
         throw new Error("No recent articles found to summarize.");
       }
 
-      const res = await fetch('/api/generate-daily-digest', {
+      const res = await apiFetch('/api/generate-daily-digest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: targetItems, model })

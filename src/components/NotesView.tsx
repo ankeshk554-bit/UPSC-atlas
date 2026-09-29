@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect, useRef } from "react";
 import {
   BookOpen,
@@ -578,7 +579,7 @@ export function NotesView({ model }: NotesViewProps) {
     setCardStatus({});
     setShowFlashcardsModule(true);
     try {
-      const response = await fetch("/api/notes-flashcards", {
+      const response = await apiFetch("/api/notes-flashcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notesText: notes, subject })
@@ -662,7 +663,7 @@ export function NotesView({ model }: NotesViewProps) {
     setIsSummarizing(true);
     setShowSummary(true);
     try {
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -864,7 +865,7 @@ export function NotesView({ model }: NotesViewProps) {
         closeDelimiter;
 
       const rawUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/google-proxy?url=${encodeURIComponent(rawUrl)}`,
         {
           method: "POST",
@@ -895,7 +896,7 @@ export function NotesView({ model }: NotesViewProps) {
     if (!topic.trim()) return;
     setIsAutoCategorizingTopic(true);
     try {
-      const res = await fetch("/api/categorize-note", {
+      const res = await apiFetch("/api/categorize-note", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: topic }),
@@ -933,7 +934,7 @@ export function NotesView({ model }: NotesViewProps) {
     try {
       setScrollProgress(0);
       if (window.innerWidth < 1024) setIsNotebookSidebarOpen(false);
-      const res = await fetch("/api/notes", {
+      const res = await apiFetch("/api/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic, subject, model, isDeepDive }),
@@ -976,7 +977,7 @@ export function NotesView({ model }: NotesViewProps) {
       formData.append("document", file);
       
       try {
-        const res = await fetch("/api/ocr", {
+        const res = await apiFetch("/api/ocr", {
           method: "POST",
           body: formData,
         });

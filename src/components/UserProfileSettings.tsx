@@ -1,3 +1,5 @@
+import { exportWorkspace, snapshot, saveWorkspace } from '../lib/cloud';
+import { WORKSPACE_KEYS } from '../../shared/workspace';
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { 
@@ -78,56 +80,25 @@ export function UserProfileSettings() {
     try {
       await logout();
       setCurrentUser(null);
-      // Reset profile defaults
-      handleSaveProfile("Scholar " + Math.floor(100 + Math.random() * 900), "🧠");
+
     } catch (e) {
       console.error(e);
     }
   };
 
-  // Multi-module full export of notes, schedule metrics, and tracker logs as JSON backup
-  const handleExportAllData = () => {
-    const fullBackup: Record<string, any> = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) {
-        try {
-          const val = localStorage.getItem(key);
-          fullBackup[key] = val && (val.startsWith("{") || val.startsWith("[")) ? JSON.parse(val) : val;
-        } catch (e) {
-          fullBackup[key] = localStorage.getItem(key);
-        }
-      }
+  const handleExportAllData = () => exportWorkspace();
+  const handleWipeDatabase = async () => {
+    setWipeStatus('Resetting study progress...');
+    const previous = snapshot();
+    exportWorkspace(previous);
+    try {
+      WORKSPACE_KEYS.forEach(key => localStorage.removeItem(key));
+      await saveWorkspace();
+      window.location.reload();
+    } catch (error) {
+      Object.entries(previous).forEach(([key, value]) => localStorage.setItem(key, value));
+      setWipeStatus(error instanceof Error ? error.message : 'Reset failed. Progress was preserved.');
     }
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackup, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `upsc_atlas_secure_backup_${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
-
-  // Securely wipe all history logs, user sessions, chat records and reset storage securely
-  const handleWipeDatabase = () => {
-    setWipeStatus("Wiping local databases...");
-    setTimeout(() => {
-      localStorage.clear();
-      // Restore basic settings
-      localStorage.setItem("library_profile_name", "Pristine Scholar");
-      localStorage.setItem("library_profile_avatar", "⭐");
-      setProfileName("Pristine Scholar");
-      setProfileAvatar("⭐");
-      
-      setWipeStatus("Storage completely purified!");
-      setTimeout(() => {
-        setWipeStatus(null);
-        setShowConfirmWipe(false);
-        setIsOpen(false);
-        // Refresh full layout
-        window.location.reload();
-      }, 1500);
-    }, 1200);
   };
 
   // Simple array of companion emoji selections
@@ -305,9 +276,9 @@ export function UserProfileSettings() {
                     <button
                       onClick={() => setShowConfirmWipe(true)}
                       className="px-3 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 hover:border-red-500 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      title="Purge all regional data"
+                      title="Reset this account's study progress"
                     >
-                      <Trash2 className="w-3.5 h-3.5" /> Purge Local Data
+                      <Trash2 className="w-3.5 h-3.5" /> Reset Study Progress
                     </button>
                   </div>
 
@@ -317,7 +288,7 @@ export function UserProfileSettings() {
                         <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                         <div className="space-y-2">
                           <h5 className="text-[11px] font-black uppercase text-red-500 tracking-wider">Are you absolutely sure?</h5>
-                          <p className="text-[10px] text-muted">This will erase all notes, tracker configurations, blueprints and custom presets from this device. This operation is irrecoverable.</p>
+                          <p className="text-[10px] text-muted">This resets this account's current progress on all devices. A copy will be downloaded first. Existing Drive backups and recovery snapshots remain available.</p>
                           
                           {wipeStatus ? (
                             <div className="text-[10px] text-red-500 font-bold animate-pulse">{wipeStatus}</div>

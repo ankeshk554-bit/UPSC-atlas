@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect } from "react";
 import {
   UploadCloud,
@@ -71,7 +72,7 @@ export function EvaluateView({ model }: EvaluateViewProps) {
     setIsStructureLoading(true);
     setStructureError("");
     try {
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -146,7 +147,7 @@ export function EvaluateView({ model }: EvaluateViewProps) {
       formData.append("document", f);
       
       try {
-        const res = await fetch("/api/ocr", {
+        const res = await apiFetch("/api/ocr", {
           method: "POST",
           body: formData,
         });
@@ -180,7 +181,7 @@ export function EvaluateView({ model }: EvaluateViewProps) {
     formData.append("model", model);
 
     try {
-      const res = await fetch("/api/evaluate", {
+      const res = await apiFetch("/api/evaluate", {
         method: "POST",
         body: formData,
       });

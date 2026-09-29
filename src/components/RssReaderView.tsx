@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect } from "react";
 import {
   Rss,
@@ -891,7 +892,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
         if (feedsCache[feed.id]) continue;
 
         try {
-          const response = await fetch(
+          const response = await apiFetch(
             `/api/rss-proxy?url=${encodeURIComponent(feed.url)}&_t=${Date.now()}`,
             { cache: 'no-store' }
           );
@@ -967,7 +968,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
 
     try {
       // Fetch via CORS-bypassing express server endpoint
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/rss-proxy?url=${encodeURIComponent(targetFeed.url)}&_t=${Date.now()}`,
         { cache: 'no-store' }
       );
@@ -1066,7 +1067,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
     let articleContentText = "";
 
     try {
-      const resp = await fetch(
+      const resp = await apiFetch(
         `/api/fetch-article?url=${encodeURIComponent(item.link)}`,
       );
       if (resp.ok) {
@@ -1096,7 +1097,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
 
     if (articleContentText) {
       setIsExtractingTopics(true);
-      fetch('/api/rss-extract-keywords', {
+      apiFetch('/api/rss-extract-keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: item.title, content: articleContentText })
@@ -1290,7 +1291,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
     setAddError("");
     setIsValidatingFeed(true);
     try {
-      const resp = await fetch(`/api/rss-proxy?url=${encodeURIComponent(cleanUrl)}&_t=${Date.now()}`, {
+      const resp = await apiFetch(`/api/rss-proxy?url=${encodeURIComponent(cleanUrl)}&_t=${Date.now()}`, {
         cache: 'no-store',
         signal: AbortSignal.timeout(8000)
       });
@@ -1350,7 +1351,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
     setIsDiscoverOfflineFallback(false);
 
     try {
-      const resp = await fetch("/api/rss-discover", {
+      const resp = await apiFetch("/api/rss-discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ keywords: trimmed }),
@@ -1448,7 +1449,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
 
     setIsSummarizing(true);
     try {
-      const response = await fetch("/api/rss-summarize", {
+      const response = await apiFetch("/api/rss-summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1540,7 +1541,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
     if (!selectedItem) return;
     setIsGeneratingMcq(true);
     try {
-      const response = await fetch('/api/rss-generate-mcq', {
+      const response = await apiFetch('/api/rss-generate-mcq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1568,7 +1569,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
     if (!selectedItem) return;
     setIsGeneratingFlashcards(true);
     try {
-      const response = await fetch('/api/rss-generate-flashcards', {
+      const response = await apiFetch('/api/rss-generate-flashcards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1600,7 +1601,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
     const articleText = fullArticle?.content || selectedItem.content || selectedItem.description || "";
 
     try {
-      const response = await fetch("/api/rss-ai-summary", {
+      const response = await apiFetch("/api/rss-ai-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1948,7 +1949,7 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
 
     setIsCategorizingNote(true);
     try {
-      const response = await fetch('/api/categorize-note', {
+      const response = await apiFetch('/api/categorize-note', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: selectedText }),
@@ -2933,12 +2934,14 @@ export function RssReaderView({ model, onNavigate }: RssReaderViewProps) {
                 onScroll={handleScroll}
               >
                 {viewMode === "web" ? (
-                  <iframe
-                    title="Web View"
-                    src={`/api/webview-proxy?url=${encodeURIComponent(selectedItem.link)}`}
-                    className="w-full h-full border-0 flex-1 bg-white"
-                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                  />
+                  <div className="p-6 space-y-4">
+                    <h2 className="text-xl font-semibold">Read at the source</h2>
+                    <a href={/^https:\/\//i.test(selectedItem.link) ? selectedItem.link : '#'}
+                      target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-accent underline">
+                      Open original article
+                    </a>
+                  </div>
                 ) : (
                   <div className="px-4 py-4 lg:px-8 lg:py-6 flex-1 relative min-w-0 overflow-x-hidden">
                     <article

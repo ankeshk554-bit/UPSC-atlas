@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import mermaid from "mermaid";
@@ -924,7 +925,7 @@ export const MermaidChart: React.FC<MermaidProps> = React.memo(({ chart }) => {
     setIsEnriching(true);
     setEnrichSuccess(false);
     try {
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -968,7 +969,7 @@ CRITICAL REQUIREMENTS:
     setIsDeconstructing(true);
     setDeconstructedData(null);
     try {
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1661,4 +1662,3 @@ CRITICAL CONSTRAINTS:
     </div>
   );
 });
-

@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useRef, useEffect } from "react";
 import {
   Send,
@@ -98,7 +99,7 @@ export function ChatView({ model }: ChatViewProps) {
 Logs: ${JSON.stringify(deepWorkLogs.slice(-5))}
 Give a 1-2 sentence recommendation. Keep it short.`;
 
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [{ role: "user", content: prompt }], model: currentModel }),
@@ -258,7 +259,7 @@ Give a 1-2 sentence recommendation. Keep it short.`;
         content: m.content,
       }));
 
-      const res = await fetch("/api/chat", {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history, model }),

@@ -1,4 +1,10 @@
+import 'dotenv/config';
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
+import { authenticate, reserveGeneration } from './server/platform';
+import { installWorkspaceRoutes } from './server/workspace';
+import { installReaderRoutes } from './server/reader';
+import { safeFetch as fetch, googleUrl } from './server/network';
 import multer from 'multer';
 import OpenAI from 'openai';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -10,7 +16,7 @@ import { Readability } from '@mozilla/readability';
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 const UPSC_SYLLABUS_CONTEXT = `
@@ -90,65 +96,26 @@ You are equipped with Google Search Grounding. To ensure 100% factual, historica
 5. Keep your tone strictly analytical and objective. Cite specific years, statistics, and Articles to back up your claims.
 `;
 
-function getDeepSeekClient() {
-  const key = "sk-80c2f61a33524731ab0bfe47f270f23f";
-  if (!key) {
-    throw new Error('DEEPSEEK_API_KEY environment variable is required.');
-  }
-  return new OpenAI({
-    baseURL: 'https://api.deepseek.com/v1',
-    apiKey: key,
-    timeout: 90000, // 90 seconds timeout for high quality DeepSeek completion
-  });
-}
-
-async function createDeepSeekCompletion(params: {
-  model: string;
-  messages: any[];
-  response_format?: any;
-}) {
-  const client = getDeepSeekClient();
-  const selectedModel = params.model || 'deepseek-chat';
-  const isReasoner = selectedModel.toLowerCase().includes('reasoner');
-
-  if (isReasoner) {
-    const systemMsg = params.messages.find(m => m.role === 'system');
-    const systemContent = systemMsg ? systemMsg.content : '';
-    const otherMsg = params.messages.filter(m => m.role !== 'system');
-
-    const formattedMessages: any[] = [];
-    if (systemContent) {
-      if (otherMsg.length > 0 && otherMsg[0].role === 'user') {
-        formattedMessages.push({
-          role: 'user',
-          content: `${systemContent}\n\n${otherMsg[0].content}`
-        });
-        formattedMessages.push(...otherMsg.slice(1));
-      } else {
-        formattedMessages.push({
-          role: 'user',
-          content: systemContent
-        });
-        formattedMessages.push(...otherMsg);
-      }
-    } else {
-      formattedMessages.push(...otherMsg);
-    }
-
-    return await client.chat.completions.create({
-      model: selectedModel,
-      messages: formattedMessages
+async function createDeepSeekCompletion(params: { model: string; messages: any[]; response_format?: any }) {
+  const key = process.env.DEEPSEEK_API_KEY;
+  if (!key) throw new Error('DEEPSEEK_API_KEY is not configured.');
+  if (Buffer.byteLength(JSON.stringify(params.messages)) > 80000) throw new Error('AI input exceeds 80 KB. Select a shorter passage.');
+  const finish = await reserveGeneration();
+  let usage: any;
+  try {
+    const client = new OpenAI({ baseURL: 'https://api.deepseek.com', apiKey: key, timeout: 90000, maxRetries: 0 });
+    const response = await client.chat.completions.create({
+      model: params.model?.includes('reasoner')
+        ? (process.env.DEEPSEEK_REASONER_MODEL || 'deepseek-reasoner')
+        : (process.env.DEEPSEEK_MODEL || 'deepseek-chat'),
+      messages: [{ role: 'system', content: 'Do not claim live web search or verified citations. No search tool is available. Base article summaries only on supplied source text, distinguish inference from fact, and state when current facts need checking.' }, ...params.messages],
+      response_format: params.response_format,
+      max_tokens: 8192,
     });
-  } else {
-    const options: any = {
-      model: selectedModel,
-      messages: params.messages,
-    };
-    if (params.response_format) {
-      options.response_format = params.response_format;
-    }
-    return await client.chat.completions.create(options);
-  }
+    usage = response.usage;
+    if (response.choices[0]?.finish_reason === 'length') throw new Error('The answer exceeded the output limit. Narrow the request and try again.');
+    return response;
+  } finally { await finish(usage); }
 }
 
 function getGeminiClient() {
@@ -166,69 +133,30 @@ function getGeminiClient() {
   });
 }
 
-async function generateGeminiWithRetry(params: {
-  model: string;
-  contents: any;
-  config?: any;
-}) {
-  const gemini = getGeminiClient();
-  const maxRetries = 2;
-  let lastError: any = null;
-
-  // We fall back across reliable standard Gemini model aliases
-  const modelsToTry: string[] = [];
-  if (params.model && params.model.toLowerCase().includes('gemini')) {
-    modelsToTry.push(params.model);
+// Compatibility adapter: all existing text-generation features now use DeepSeek.
+async function generateGeminiWithRetry(params: { model: string; contents: any; config?: any }): Promise<{ text: string }> {
+  const contents = typeof params.contents === 'string' ? [{ parts: [{ text: params.contents }] }]
+    : Array.isArray(params.contents) ? params.contents : [params.contents];
+  const parts = contents.flatMap((item: any) => item.parts || []);
+  if (parts.some((part: any) => part.inlineData)) {
+    const finish = await reserveGeneration();
+    try {
+      const response = await getGeminiClient().models.generateContent({
+        model: process.env.OCR_MODEL || 'gemini-2.5-flash',
+        contents: params.contents, config: { ...params.config, maxOutputTokens: 8192 },
+      });
+      return { text: response.text || '' };
+    } finally { await finish(); }
   }
-  modelsToTry.push('gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro');
-
-  const uniqueModels = Array.from(new Set(modelsToTry));
-
-  // If tools (e.g. googleSearch) are provided, Gemini API requires responseMimeType NOT to be application/json
-  let initialConfig = params.config ? { ...params.config } : undefined;
-  if (initialConfig && initialConfig.tools && initialConfig.tools.length > 0 && initialConfig.responseMimeType) {
-    delete initialConfig.responseMimeType;
-  }
-
-  for (const modelName of uniqueModels) {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        console.log(`Executing Gemini generateContent - Model: ${modelName}, Attempt: ${attempt}/${maxRetries}`);
-        const response = await gemini.models.generateContent({
-          model: modelName,
-          contents: params.contents,
-          config: initialConfig,
-        });
-        return response;
-      } catch (err: any) {
-        lastError = err;
-        console.warn(`Gemini model ${modelName} attempt ${attempt} failed: ${err?.message || err}`);
-
-        // If tools were used, retry on same model immediately without tools
-        if (initialConfig && initialConfig.tools) {
-          try {
-            console.log(`Retrying Gemini model ${modelName} without search grounding tools...`);
-            const configNoTools = { ...initialConfig };
-            delete configNoTools.tools;
-            if (params.config?.responseMimeType) {
-              configNoTools.responseMimeType = params.config.responseMimeType;
-            }
-            const response = await gemini.models.generateContent({
-              model: modelName,
-              contents: params.contents,
-              config: configNoTools,
-            });
-            return response;
-          } catch (noToolsErr: any) {
-            console.warn(`Gemini retry without tools also failed on ${modelName}: ${noToolsErr?.message || noToolsErr}`);
-          }
-        }
-        break; // Move to next model in uniqueModels
-      }
-    }
-  }
-
-  throw lastError;
+  const response = await createDeepSeekCompletion({
+    model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
+    messages: [
+      { role: 'system', content: String(params.config?.systemInstruction || UPSC_SYLLABUS_CONTEXT) },
+      { role: 'user', content: parts.map((part: any) => part.text || '').join('\n') },
+    ],
+    response_format: params.config?.responseMimeType === 'application/json' ? { type: 'json_object' } : undefined,
+  });
+  return { text: response.choices[0]?.message.content || '' };
 }
 
 function heuristicBulkCategorize(items: any[]): Record<string, string> {
@@ -564,10 +492,22 @@ function robustJsonParse(text: string): any {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 
-  app.use(express.json({ limit: '50mb' }));
-  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+  app.disable('x-powered-by');
+  app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+  });
+  app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+  app.use('/api', rateLimit({ windowMs: 60000, limit: 120, standardHeaders: 'draft-7', legacyHeaders: false }));
+  app.use('/api', authenticate);
+  app.use('/api', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
+  app.use(express.json({ limit: '6mb' }));
+  app.use(express.urlencoded({ limit: '1mb', extended: false }));
+  installWorkspaceRoutes(app);
+  installReaderRoutes(app);
 
   app.post('/api/diagrams-generate', async (req, res) => {
     try {
@@ -1620,17 +1560,25 @@ Return EXACTLY this JSON structure:
   }
 }`;
       
-      let parts: any[] = [{ text: evalPrompt }];
+      let answerText = typeof req.body.text === 'string' ? req.body.text : '';
       if (req.file) {
-        parts.push({
-          inlineData: {
-            data: req.file.buffer.toString('base64'),
-            mimeType: req.file.mimetype,
+        if (req.file.mimetype === 'text/plain') answerText = req.file.buffer.toString('utf8');
+        else {
+          if (!['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(req.file.mimetype)) {
+            return res.status(400).json({ error: 'Upload a PDF, PNG, JPEG, WebP, or plain text answer.' });
           }
-        });
-      } else if (req.body.text) {
-        parts.push({ text: `\n\nASPIRANT ANSWER TEXT:\n${req.body.text}` });
+          const extracted = await generateGeminiWithRetry({
+            model: process.env.OCR_MODEL || 'gemini-2.5-flash',
+            contents: { parts: [
+              { text: 'Transcribe the answer exactly as written. Return only the extracted text. Do not evaluate it.' },
+              { inlineData: { data: req.file.buffer.toString('base64'), mimeType: req.file.mimetype } },
+            ] },
+          });
+          answerText = extracted.text;
+        }
       }
+      if (!answerText.trim()) return res.status(422).json({ error: 'No readable answer was found. Paste the answer text and retry.' });
+      const parts = [{ text: evalPrompt + '\n\nASPIRANT ANSWER TEXT:\n' + answerText }];
 
       const response = await generateGeminiWithRetry({
         model: 'gemini-3.1-flash-lite',
@@ -1657,26 +1605,18 @@ Return EXACTLY this JSON structure:
       res.json(parsedResponse);
 
     } catch (error: any) {
-      console.log('Evaluate error, executing offline fallback evaluation.');
-      try {
-        const textContent = req.file ? req.file.buffer.toString('utf-8').replace(/[^\x20-\x7E\n\r\t]/g, '').slice(0, 3000) : '';
-        const fallback = fallbackEvaluateAnswer(textContent, req.file?.originalname || 'document.txt');
-        return res.json(fallback);
-      } catch (fallbackError: any) {
-        console.log('Fallback evaluate failed:', fallbackError);
-        res.status(500).json({ error: error.message || 'Internal Server Error' });
-      }
+      res.status(503).json({ error: 'Evaluation is unavailable. Your answer has been preserved; please retry.' });
     }
   });
 
-  app.all('/api/google-proxy', async (req, res) => {
+  app.all('/api/google-proxy', express.raw({ type: 'multipart/related', limit: '6mb' }), async (req, res) => {
     try {
       const targetUrl = req.query.url as string;
       if (!targetUrl) {
         return res.status(400).json({ error: 'Missing target URL query parameter' });
       }
 
-      if (!targetUrl.includes('.googleapis.com/')) {
+      if (!googleUrl(targetUrl)) {
         return res.status(400).json({ error: 'Only Google APIs are supported by this proxy' });
       }
 
@@ -1734,366 +1674,16 @@ Return EXACTLY this JSON structure:
     }
   });
 
-  app.get('/api/rss-proxy', async (req, res) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.setHeader('Surrogate-Control', 'no-store');
-    const FAKE_HEADERS = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'cross-site',
-      'Upgrade-Insecure-Requests': '1',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache'
-    };
-
-    try {
-      const url = req.query.url as string;
-      if (!url) {
-        return res.status(400).json({ error: 'Missing feed URL' });
-      }
-
-      // We rely on Cache-Control headers instead of appending _t to avoid breaking strict feeds
-      const targetUrl = new URL(url);
-
-      const parser = new Parser({
-        customFields: {
-          item: ['content:encoded', 'description', 'creator', 'dc:creator', 'pubDate'],
-        },
-        timeout: 8000,
-        requestOptions: {
-          headers: { ...FAKE_HEADERS, 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' },
-          timeout: 8000
-        }
-      });
-      
-      const feed = await parser.parseURL(targetUrl.toString());
-      
-      const items = feed.items.map((item: any) => ({
-        id: item.link || item.guid || Math.random().toString(36).substring(7),
-        title: item.title?.trim() || 'Untitled',
-        link: item.link?.trim() || '',
-        description: item.description?.trim() || item['content:encoded']?.trim() || '',
-        content: item['content:encoded']?.trim() || item.content?.trim() || item.description?.trim() || '',
-        pubDate: item.pubDate || item.isoDate || '',
-        creator: item.creator || item['dc:creator'] || feed.title || 'UPSC Newsdesk'
-      }));
-
-      // Robustly sort items by publication date descending (latest first)
-      items.sort((a: any, b: any) => {
-        const timeA = a.pubDate ? new Date(a.pubDate).getTime() : 0;
-        const timeB = b.pubDate ? new Date(b.pubDate).getTime() : 0;
-        const validA = !isNaN(timeA) && timeA > 0;
-        const validB = !isNaN(timeB) && timeB > 0;
-        
-        if (validA && validB) return timeB - timeA;
-        if (validA && !validB) return -1;
-        if (!validA && validB) return 1;
-        return 0;
-      });
-      
-      res.json({ items });
-    } catch (err: any) {
-      // Fallback: try standard fetch with strict timeout if rss-parser fails.
-      try {
-        let fetchRes = await fetch(req.query.url as string, {
-          headers: { ...FAKE_HEADERS, 'Cache-Control': 'no-cache, no-store, must-revalidate' },
-          cache: 'no-store',
-          signal: AbortSignal.timeout(6000)
-        });
-        
-        let xml = '';
-        if (!fetchRes.ok) {
-           const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(req.query.url as string)}&disableCache=true`;
-           const proxyRes = await fetch(proxyUrl, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
-           if (proxyRes.ok) {
-              const proxyData = await proxyRes.json();
-              xml = proxyData.contents;
-           }
-        } else {
-           xml = await fetchRes.text();
-        }
-        
-        if (xml && xml.trim().length > 100) {
-           return res.json({ xmlFallback: xml });
-        }
-      } catch(e) {}
-      
-      res.status(502).json({ error: err.message || 'Failed to fetch RSS feed', isError: true });
-    }
-  });
-
-  app.get('/api/webview-proxy', async (req, res) => {
-    try {
-      const url = req.query.url as string;
-      if (!url) return res.status(400).send("No url provided");
-      
-      const FAKE_HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'cross-site',
-        'Upgrade-Insecure-Requests': '1'
-      };
-
-      let fetchRes = await fetch(url, { headers: FAKE_HEADERS });
-      let contentType = fetchRes.headers.get('content-type') || 'text/html';
-      let html = '';
-
-      if (!fetchRes.ok) {
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        const proxyRes = await fetch(proxyUrl);
-        if (proxyRes.ok) {
-          const proxyData = await proxyRes.json();
-          html = proxyData.contents;
-          contentType = proxyData.status?.content_type || 'text/html';
-        } else {
-          const buffer = await fetchRes.arrayBuffer();
-          html = new TextDecoder("utf-8").decode(buffer);
-        }
-      } else {
-        const buffer = await fetchRes.arrayBuffer();
-        html = new TextDecoder("utf-8").decode(buffer);
-      }
-      
-      if (contentType.includes('text/html')) {
-        const originObj = new URL(url);
-        const baseTag = `<base href="${originObj.origin}" target="_blank" />`;
-        // Inject base URL to fix relative links and assets in the iframe
-        if (html.includes('<head>')) {
-          html = html.replace('<head>', `<head>${baseTag}`);
-        } else if (html.includes('<HEAD>')) {
-          html = html.replace('<HEAD>', `<HEAD>${baseTag}`);
-        } else {
-          html = `${baseTag}${html}`;
-        }
-      }
-      
-      res.setHeader('Content-Type', contentType);
-      // Explicitly allow embedding
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.send(html);
-    } catch (err) {
-      console.error('WebView Proxy Error:', err);
-      res.status(500).send("Error proxying the page");
-    }
-  });
-
-  app.get('/api/fetch-article', async (req, res) => {
-    try {
-      const targetUrl = req.query.url as string;
-      if (!targetUrl) return res.status(400).json({ error: "Missing url" });
-
-      const FAKE_HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-      };
-
-      let html = '';
-      try {
-        let fetchRes = await fetch(targetUrl, {
-          headers: FAKE_HEADERS
-        });
-        
-        // If forbidden or error, try allorigins proxy to bypass IP blocks
-        if (!fetchRes.ok) {
-          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-          const proxyRes = await fetch(proxyUrl);
-          if (proxyRes.ok) {
-            const proxyData = await proxyRes.json();
-            html = proxyData.contents;
-          } else {
-             html = await fetchRes.text();
-          }
-        } else {
-           html = await fetchRes.text();
-        }
-        
-        if (!html || html.length < 500) {
-           return res.json({ title: null, content: null, html: null, error: `Failed to fetch article or body too short` });
-        }
-      } catch (fetchErr: any) {
-        return res.json({ title: null, content: null, html: null, error: fetchErr.message });
-      }
-
-      const doc = new JSDOM(html, { url: targetUrl });
-      
-      // PRE-PROCESSING: Remove common "Also Read", "Related" blocks that leave orphaned images
-      const document = doc.window.document;
-      const elementsToRemove = document.querySelectorAll(
-        '.also-read, .related-news, .related-articles, .read-more, [id*="related"], [class*="related"], [class*="also-read"], [class*="read-also"], [class*="recommended"], [class*="more-news"], .wp-block-embed'
-      );
-      elementsToRemove.forEach(el => el.remove());
-
-      // Readability aggressively strips iframes unless they match specific video sites.
-      // We will encode them into placeholder divs, then restore them after parsing.
-      const mediaPlaceholders = new Map();
-      let mediaCounter = 0;
-
-      const mediaElements = document.querySelectorAll('iframe, video, audio');
-      mediaElements.forEach(el => {
-        const id = 'media_placeholder_' + (mediaCounter++);
-        mediaPlaceholders.set(id, el.outerHTML);
-        const placeholder = document.createElement('div');
-        placeholder.setAttribute('id', id);
-        placeholder.textContent = id; // Give it text so readability doesn't strip it for being empty
-        el.replaceWith(placeholder);
-      });
-
-      const reader = new Readability(doc.window.document, {
-        keepClasses: true,
-      });
-      const article = reader.parse();
-
-      let finalHtml = article?.content || null;
-      if (finalHtml) {
-        // Restore media placeholders
-        for (const [id, outerHTML] of Array.from(mediaPlaceholders.entries())) {
-          // Readability might have wrapped the text in <p> or kept the <div>
-          const regex = new RegExp('<div id="' + id + '">.*?<\/div>|<p id="' + id + '">.*?<\/p>|' + id, 'g');
-          finalHtml = finalHtml.replace(regex, outerHTML);
-        }
-      }
-
-      res.json({
-        title: article?.title || null,
-        content: article?.textContent || null,
-        html: finalHtml,
-        excerpt: article?.excerpt || null
-      });
-
-    } catch (err: any) {
-      console.error('Fetch article error:', err);
-      res.json({ title: null, content: null, html: null, error: err.message });
-    }
-  });
 
   app.post('/api/rss-bulk-categorize', async (req, res) => {
-    try {
-      const { items } = req.body;
-      if (!items || !Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ error: 'Missing or empty items array' });
-      }
-
-      // Limit to 20 items per request to avoid huge payloads to Gemini
-      const itemsToCategorize = items.slice(0, 20);
-      
-      const payloadDescription = itemsToCategorize.map((item: any) => 
-        `ID: ${item.id}\nTitle: ${item.title}\nDescription Snippet: ${item.description?.substring(0, 150) || 'None'}\n`
-      ).join('---\n');
-
-      const prompt = `You are a UPSC CSE prep assistant. Assign exactly one of the following syllabus categories to each news item provided below.
-      
-Categories:
-- Polity & Governance
-- Economics
-- International Relations
-- Environment & Geography
-- Science & Tech
-- History & Culture
-- Ethics & Integrity
-- Society & Social Issues
-- General / Editorial
-
-Here are the items:
-${payloadDescription}
-
-Return your response strictly as a JSON object mapping the ID to the Category string. For example:
-{
-  "item1_id": "Economics",
-  "item2_id": "Polity & Governance"
-}
-Output nothing but the JSON object (no markdown formatting like \`\`\`json).`;
-
-      const response = await generateGeminiWithRetry({
-        model: 'gemini-3.1-flash-lite',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          temperature: 0.1
-        }
-      });
-      
-      const text = response.text || '';
-      try {
-        const categoriesMap = robustJsonParse(text);
-        res.json({ categories: categoriesMap });
-        console.log("Categorized", Object.keys(categoriesMap).length, "items.");
-      } catch (e) {
-        console.error('Failed to parse Gemini category JSON:', text);
-        res.status(500).json({ error: 'Failed to parse AI response' });
-      }
-
-    } catch (err: any) {
-      console.log('AI categorization hit exception. Falling back to offline heuristics.');
-      try {
-        const { items } = req.body;
-        const fallbackMap = heuristicBulkCategorize(items || []);
-        res.json({ categories: fallbackMap, isOfflineFallback: true });
-      } catch (fallbackError: any) {
-        console.log('Offline bulk categorization fallback failed:', fallbackError);
-        res.status(500).json({ error: err.message || 'Error occurred during AI categorization' });
-      }
-    }
+    const items = req.body.items;
+    if (!Array.isArray(items) || items.length > 500) return res.status(400).json({ error: 'Supply up to 500 articles.' });
+    return res.json({ categories: heuristicBulkCategorize(items) });
   });
 
   app.post('/api/rss-extract-keywords', async (req, res) => {
-    try {
-      const { title, content } = req.body;
-      if (!content) {
-        return res.status(400).json({ error: 'Missing article content' });
-      }
-
-      const prompt = `You are a UPSC CSE mentor. Read the following article and extract:
-1. 3-5 core keywords.
-2. 2-3 specific related UPSC syllabus topics (e.g. "GS Paper 2: International Relations", "GS Paper 3: Environment - Climate Change").
-
-Article Title: "${title || 'Untitled'}"
-Article Content:
-${content.substring(0, 3000)}
-
-Output ONLY valid JSON in this format:
-{
-  "keywords": ["keyword1", "keyword2"],
-  "syllabusTopics": ["topic1", "topic2"]
-}`;
-
-      const response = await generateGeminiWithRetry({
-        model: 'gemini-3.1-flash-lite',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          temperature: 0.1
-        }
-      });
-      
-      const text = response.text || '';
-      try {
-        const data = robustJsonParse(text);
-        res.json(data);
-      } catch (e) {
-        console.error('Failed to parse Gemini keywords JSON:', text);
-        res.status(500).json({ error: 'Failed to parse AI response' });
-      }
-
-    } catch (err: any) {
-      console.log('AI keyword extraction hit exception. Falling back to offline NLP.');
-      try {
-        const { title, content } = req.body;
-        const data = fallbackRssExtractKeywords(title || '', content || '');
-        res.json({ ...data, isOfflineFallback: true });
-      } catch (fallbackError: any) {
-        console.log('Offline keyword extraction fallback failed:', fallbackError);
-        res.status(500).json({ error: err.message || 'Error occurred during AI extraction' });
-      }
-    }
+    const { title, content } = req.body;
+    return res.json(fallbackRssExtractKeywords(String(title || ''), String(content || '')));
   });
 
   app.post('/api/rss-summarize', async (req, res) => {
@@ -2103,7 +1693,6 @@ Output ONLY valid JSON in this format:
         return res.status(400).json({ error: 'Missing article content' });
       }
 
-      const deepseek = getDeepSeekClient();
       const prompt = `You are a premier UPSC Civil Services Examination (CSE) examiner, syllabus expert, and mentor. 
       Please synthesize a high-yield, structured, CSE-oriented executive summary of the following news article.
       
@@ -3194,15 +2783,15 @@ Text to categorize:
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    const distPath = path.join(process.cwd(), 'dist/client');
+    app.use(express.static(distPath, { dotfiles: 'deny' }));
     app.get('*', (req, res) => {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT, process.env.HOST || '127.0.0.1', () => {
     console.log(`Server running on port ${PORT}`);
   });
 }

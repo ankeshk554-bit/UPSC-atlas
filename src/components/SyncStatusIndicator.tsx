@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { performBackup, lastSyncTimeKey } from '../lib/useAutoSync';
-import { getAccessToken } from '../lib/auth';
+import { auth } from '../lib/auth';
 
 export const SyncStatusIndicator = () => {
   const [lastSync, setLastSync] = useState(() => localStorage.getItem(lastSyncTimeKey));
@@ -12,17 +12,22 @@ export const SyncStatusIndicator = () => {
     const interval = setInterval(() => {
       setLastSync(localStorage.getItem(lastSyncTimeKey));
     }, 5000);
-    return () => clearInterval(interval);
+    const status = (event: Event) => {
+      const message = (event as CustomEvent<string>).detail;
+      setFeedbackMsg(message ? { text: message, isError: true } : null);
+      setLastSync(localStorage.getItem(lastSyncTimeKey));
+    };
+    window.addEventListener('atlas-sync-status', status);
+    return () => { clearInterval(interval); window.removeEventListener('atlas-sync-status', status); };
   }, []);
 
   const handleManualSync = async () => {
     setIsSyncing(true);
     setFeedbackMsg(null);
     try {
-      const token = await getAccessToken();
-      if (token) {
-        await performBackup(token, false);
-        setLastSync(Date.now().toString());
+      if (auth.currentUser) {
+        await performBackup(undefined, false);
+        setLastSync(localStorage.getItem(lastSyncTimeKey));
         setFeedbackMsg({ text: "Synced successfully!", isError: false });
         setTimeout(() => setFeedbackMsg(null), 3500);
       } else {
