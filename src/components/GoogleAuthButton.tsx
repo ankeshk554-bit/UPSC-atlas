@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LogOut } from "lucide-react";
 import { initAuth, googleSignIn, logout, getAccessToken } from "../lib/auth";
 import type { User } from "firebase/auth";
+import { signInErrorMessage } from "../../shared/authErrors";
 
 export const GoogleAuthButton = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -33,22 +34,15 @@ export const GoogleAuthButton = () => {
     setIsLoggingIn(true);
     setLoginError(null);
     try {
-      if (window.self !== window.top) {
-        setLoginError("Sign-in may fail in this preview. If so, open the app in a New Tab (top right icon).");
-      }
       const result = await googleSignIn();
       if (result) {
         setUser(result.user);
         setToken(result.accessToken);
         setLoginError(null);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login failed:", err);
-      if (err.message?.includes('popup-closed-by-user')) {
-        setLoginError("Login popup closed. If it was blocked, click 'Open in New Tab' (top right) and try again.");
-      } else {
-        setLoginError("Login failed. Open app in a new tab if issues persist.");
-      }
+      setLoginError(signInErrorMessage(err, window.location.hostname));
     } finally {
       setIsLoggingIn(false);
     }
@@ -132,7 +126,7 @@ export const GoogleAuthButton = () => {
         <span>Sign in with Google</span>
       </button>
       {loginError && (
-        <div className="absolute top-full mt-2 right-0 w-64 bg-panel border-2 border-red-500/20 text-red-500 text-[11px] p-3 rounded-lg shadow-lg z-50 backdrop-blur-md">
+        <div role="alert" className="mt-2 w-72 max-w-full break-words bg-panel border-2 border-red-500/20 text-red-500 text-[11px] p-3 rounded-lg shadow-lg">
           {loginError}
           <div className="mt-2 text-right">
             <button onClick={() => setLoginError(null)} className="text-red-500 hover:text-red-400 font-bold p-1">Dismiss</button>
@@ -142,3 +136,4 @@ export const GoogleAuthButton = () => {
     </div>
   );
 };
+

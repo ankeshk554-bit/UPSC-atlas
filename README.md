@@ -19,6 +19,7 @@ The production build places browser assets in `dist/client` and the server in `d
 - Set a replacement `DEEPSEEK_API_KEY` in the server environment or hosting secret manager. Never use a `VITE_` prefix for secrets.
 - Configure `FIREBASE_PROJECT_ID` and `FIRESTORE_DATABASE_ID` to match `firebase-applet-config.json`.
 - Enable Google as a Firebase Auth provider and add your development and production domains to Firebase's authorized domains.
+- For local Google sign-in, open Firebase Console > Authentication > Settings > Authorized domains and add `127.0.0.1` (and `localhost` if used). Enter hostnames only, without scheme, port, or path. An `auth/unauthorized-domain` error requires this project configuration change; changing tabs does not fix it. Authorize your actual production hostname separately before launch.
 - Use Application Default Credentials / workload identity on the host. For local development, `GOOGLE_APPLICATION_CREDENTIALS` can point to a service account JSON outside the repository. Grant only the permissions needed to verify/revoke-check Firebase users and access the selected Firestore database.
 - Apply `firestore.rules` to the selected database. Client SDK access is denied; the authenticated Node backend performs all database operations. Admin SDK access bypasses rules, so server ownership checks remain mandatory.
 - The existing Firebase browser config is public project configuration, not a server secret.
@@ -64,3 +65,4 @@ npm run build
 CI runs these checks on pushes and pull requests. Tests cover destination restrictions, hostile article HTML, workspace isolation, stale writes, same-length edits, anonymous requests, and AI allowances.
 
 Before public launch, complete real-account Google sign-in/Drive testing, Firestore deployment and credentials, DeepSeek key rotation and live evaluation checks, and payment integration if charging customers. Those external services are not configured by this source change. The existing large application bundle still warrants further route-level splitting for performance.
+
