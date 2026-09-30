@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState } from "react";
 import {
   Loader2,
@@ -6,7 +7,9 @@ import {
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
-import { getAccessToken } from "../lib/auth";
+import { getAccessToken, connectGoogleDrive, invalidateGoogleAccess } from "../lib/auth";
+import { WORKSPACE_KEYS, validateWorkspace } from "../../shared/workspace";
+import { exportWorkspace, snapshot, saveWorkspace } from "../lib/cloud";
 
 async function safeParseJson(res: Response): Promise<any> {
   const text = await res.text();
@@ -24,30 +27,12 @@ export const DriveBackupButton = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const LOCAL_STORAGE_KEYS = [
-    "upsc_chat_sessions",
-    "upsc_chat_history",
-    "upsc_saved_evals",
-    "upsc_saved_notes",
-    "upsc_saved_pyqs",
-    "upsc_sessions_count",
-    "upsc_syllabus_v2",
-    "upsc_affairs_v2",
-    "upsc_rss_feeds",
-    "upsc_rss_ai_summaries",
-    "upsc_saved_rss_notes",
-    "upsc_read_rss_items",
-    "upsc_saved_blueprints",
-    "app_theme",
-  ];
+  const LOCAL_STORAGE_KEYS = WORKSPACE_KEYS;
 
   const handleBackup = async () => {
-    const token = await getAccessToken();
-    if (!token) {
-      setErrorMsg("Sign in required.");
-      setTimeout(() => setErrorMsg(""), 4000);
-      return;
-    }
+    let token: string;
+    try { token = await getAccessToken() || await connectGoogleDrive(); }
+    catch (error) { setErrorMsg(error instanceof Error ? error.message : 'Drive connection failed.'); return; }
 
     setIsProcessing(true);
     setSuccessMsg("");
@@ -81,7 +66,7 @@ export const DriveBackupButton = () => {
         closeDelimiter;
 
       const rawUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/google-proxy?url=${encodeURIComponent(rawUrl)}`,
         {
           method: "POST",
@@ -95,7 +80,7 @@ export const DriveBackupButton = () => {
 
       if (!res.ok) {
         if (res.status === 401) {
-          localStorage.removeItem("google_access_token");
+          invalidateGoogleAccess();
           throw new Error("Session expired. Please sign in again.");
         }
         const errText = await res.text();
@@ -114,12 +99,9 @@ export const DriveBackupButton = () => {
   };
 
   const handleRestore = async () => {
-    const token = await getAccessToken();
-    if (!token) {
-      setErrorMsg("Sign in required.");
-      setTimeout(() => setErrorMsg(""), 4000);
-      return;
-    }
+    let token: string;
+    try { token = await getAccessToken() || await connectGoogleDrive(); }
+    catch (error) { setErrorMsg(error instanceof Error ? error.message : 'Drive connection failed.'); return; }
 
     setIsProcessing(true);
     setSuccessMsg("");
@@ -129,7 +111,7 @@ export const DriveBackupButton = () => {
       const q =
         "(name = 'UPSC_App_AutoBackup.json' or name contains 'UPSC_App_Backup_') and mimeType='application/json' and trashed=false";
       const rawUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime desc&pageSize=1`;
-      const searchRes = await fetch(
+      const searchRes = await apiFetch(
         `/api/google-proxy?url=${encodeURIComponent(rawUrl)}`,
         {
           headers: {
@@ -140,7 +122,7 @@ export const DriveBackupButton = () => {
       
       if (!searchRes.ok) {
         if (searchRes.status === 401) {
-          localStorage.removeItem("google_access_token");
+          invalidateGoogleAccess();
           throw new Error("Session expired. Please sign in again.");
         }
         throw new Error("Failed to search backup files on Google Drive.");
@@ -155,7 +137,7 @@ export const DriveBackupButton = () => {
       const fileId = searchData.files[0].id;
 
       const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-      const fileRes = await fetch(
+      const fileRes = await apiFetch(
         `/api/google-proxy?url=${encodeURIComponent(downloadUrl)}`,
         {
           headers: {
@@ -166,23 +148,27 @@ export const DriveBackupButton = () => {
 
       if (!fileRes.ok) {
         if (fileRes.status === 401) {
-          localStorage.removeItem("google_access_token");
+          invalidateGoogleAccess();
           throw new Error("Session expired. Please sign in again.");
         }
         throw new Error("Failed to download backup");
       }
 
-      const backupData = await safeParseJson(fileRes);
+      const backupData = validateWorkspace(await safeParseJson(fileRes));
+      if (!Object.keys(backupData).length) throw new Error('This backup contains no recognized progress.');
+      if (!window.confirm('Replace this account\'s progress with the latest Drive backup? Your current progress will be downloaded first.')) return;
+      exportWorkspace(snapshot());
 
       if (typeof backupData === "object" && backupData !== null) {
         LOCAL_STORAGE_KEYS.forEach((key) => {
           if (backupData[key] !== undefined && backupData[key] !== null) {
             localStorage.setItem(key, backupData[key]);
-          } else if (backupData[key] === null) {
+          } else {
             localStorage.removeItem(key);
           }
         });
 
+        await saveWorkspace();
         setSuccessMsg("Restored! Reloading...");
         setTimeout(() => {
           window.location.reload();

@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect } from "react";
 import {
   Calendar as CalendarIcon,
@@ -16,7 +17,7 @@ import {
   Download,
 } from "lucide-react";
 import { DeepSeekModel } from "../types";
-import { getAccessToken, googleSignIn, logout } from "../lib/auth";
+import { getAccessToken, connectGoogleDrive, invalidateGoogleAccess } from "../lib/auth";
 
 interface Task {
   id: string;
@@ -126,7 +127,7 @@ export function PlannerView({ model }: { model: DeepSeekModel }) {
       // If we don't have a token, we must request it now.
       if (!token) {
         try {
-          const result = await googleSignIn();
+          const result = { accessToken: await connectGoogleDrive() };
           if (result) {
             token = result.accessToken;
           }
@@ -193,7 +194,7 @@ export function PlannerView({ model }: { model: DeepSeekModel }) {
             };
 
             const rawUrl = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
-            const res = await fetch(
+            const res = await apiFetch(
               `/api/google-proxy?url=${encodeURIComponent(rawUrl)}`,
               {
                 method: "POST",
@@ -210,7 +211,7 @@ export function PlannerView({ model }: { model: DeepSeekModel }) {
             } else {
               const errorData = await res.json();
               if (res.status === 401 || res.status === 403) {
-                await logout();
+                invalidateGoogleAccess();
                 throw new Error(
                   "Permission denied. Logged out, please try syncing again to grant Calendar access.",
                 );
@@ -270,7 +271,7 @@ export function PlannerView({ model }: { model: DeepSeekModel }) {
       let token = await getAccessToken();
       if (!token) {
         try {
-          const result = await googleSignIn();
+          const result = { accessToken: await connectGoogleDrive() };
           if (result) {
             token = result.accessToken;
           }
@@ -305,7 +306,7 @@ export function PlannerView({ model }: { model: DeepSeekModel }) {
       const rawUrl = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(startOfDay.toISOString())}&timeMax=${encodeURIComponent(endOfDay.toISOString())}&singleEvents=true&orderBy=startTime`;
       const url = `/api/google-proxy?url=${encodeURIComponent(rawUrl)}`;
       
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -313,7 +314,7 @@ export function PlannerView({ model }: { model: DeepSeekModel }) {
 
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
-          await logout();
+          invalidateGoogleAccess();
           throw new Error("Authentication session expired. Please click 'Import' again to log back in.");
         }
         throw new Error(`Failed to fetch events from Google Calendar (${res.status})`);
@@ -401,7 +402,7 @@ export function PlannerView({ model }: { model: DeepSeekModel }) {
     setGenError("");
 
     try {
-      const res = await fetch("/api/planner-generate", {
+      const res = await apiFetch("/api/planner-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, model }),

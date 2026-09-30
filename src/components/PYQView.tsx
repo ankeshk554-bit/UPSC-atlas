@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect, useMemo } from "react";
 import {
   PenTool,
@@ -466,7 +467,7 @@ export function PYQView({ model }: PYQViewProps) {
     setAnswer("");
 
     try {
-      const res = await fetch("/api/pyq", {
+      const res = await apiFetch("/api/pyq", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: item.question, subject: item.subject, marks: item.marks, model }),
@@ -614,7 +615,7 @@ export function PYQView({ model }: PYQViewProps) {
         closeDelimiter;
 
       const rawUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/google-proxy?url=${encodeURIComponent(rawUrl)}`,
         {
           method: "POST",
@@ -648,7 +649,7 @@ export function PYQView({ model }: PYQViewProps) {
     setAnswer("");
 
     try {
-      const res = await fetch("/api/pyq", {
+      const res = await apiFetch("/api/pyq", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question, subject, marks, model }),

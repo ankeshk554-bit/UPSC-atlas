@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api';
 import React, { useState, useEffect } from "react";
 import {
   Database,
@@ -214,7 +215,7 @@ export function DataBankView({ model }: { model: DeepSeekModel }) {
     setBulkItems([]);
 
     try {
-      const res = await fetch("/api/databank", {
+      const res = await apiFetch("/api/databank", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: newTopic, category: newCategory, model }),
@@ -252,7 +253,7 @@ export function DataBankView({ model }: { model: DeepSeekModel }) {
     });
 
     try {
-      const res = await fetch("/api/databank-search", {
+      const res = await apiFetch("/api/databank-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, model }),
