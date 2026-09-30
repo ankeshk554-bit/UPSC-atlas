@@ -1,0 +1,16 @@
+name = "upsc-atlas"
+type = "javascript"
+workers_dev = true
+
+[build]
+command = "npm ci && npm run build"
+cwd = "./"
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+name = "upsc-atlas-prod"
+
+[triggers]
+crons = []

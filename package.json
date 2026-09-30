@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build --configLoader runner --outDir dist/client && vite build --configLoader runner --ssr server.ts --outDir dist/server",
+    "build": "vite build",
     "start": "node scripts/start.mjs",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
