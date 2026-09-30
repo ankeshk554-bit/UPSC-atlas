@@ -1,16 +1,4 @@
-name = "upsc-atlas"
-type = "javascript"
-workers_dev = true
+compatibility_date = "2026-09-26"
 
-[build]
-command = "npm ci && npm run build"
-cwd = "./"
-
-[build.upload]
-format = "service-worker"
-
-[env.production]
-name = "upsc-atlas-prod"
-
-[triggers]
-crons = []
+[assets]
+directory = "./dist/client"
