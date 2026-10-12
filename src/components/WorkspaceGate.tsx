@@ -4,6 +4,7 @@ import { Download, RefreshCw } from 'lucide-react';
 import { auth, logout } from '../lib/auth';
 import { readAccountCache } from '../lib/accountCache';
 import { GoogleAuthButton } from './GoogleAuthButton';
+import { signInErrorMessage } from '../../shared/authErrors';
 import { openWorkspace, activateWorkspace, closeWorkspace, equalWorkspace, exportWorkspace } from '../lib/cloud';
 const App = lazy(() => import('../App'));
 type Choice = Awaited<ReturnType<typeof openWorkspace>>;
@@ -21,13 +22,13 @@ export function WorkspaceGate() {
     const unsubscribe = onAuthStateChanged(auth, async user => {
       const current = ++sequence;
       setReady(false); setChoice(null); setError(''); setSignedIn(!!user);
-      if (!user) {
-        // Preserve unclaimed legacy data until the first authenticated import.
-        if (localStorage.getItem('atlas_workspace_owner')) await closeWorkspace();
-        setLoading(false); return;
-      }
       setLoading(true);
       try {
+        if (!user) {
+          // Preserve unclaimed legacy data until the first authenticated import.
+          if (localStorage.getItem('atlas_workspace_owner')) await closeWorkspace();
+          return;
+        }
         const result = await openWorkspace(user.uid);
         if (cancelled || current !== sequence) return;
         const hasLocal = Object.keys(result.local).length > 0;
@@ -40,6 +41,11 @@ export function WorkspaceGate() {
       } catch (e) {
         if (!cancelled && current === sequence) setError(e instanceof Error ? e.message : 'Could not load progress.');
       } finally { if (!cancelled && current === sequence) setLoading(false); }
+    }, authError => {
+      if (cancelled) return;
+      sequence++;
+      setReady(false); setChoice(null); setSignedIn(false); setLoading(false);
+      setError(signInErrorMessage(authError, window.location.hostname));
     });
     const conflict = () => setAttempt(value => value + 1);
     window.addEventListener('atlas-workspace-conflict', conflict);
@@ -71,7 +77,7 @@ export function WorkspaceGate() {
         <button className="border rounded-md p-3 inline-flex gap-2" onClick={async () => {
           if (auth.currentUser) exportWorkspace(await readAccountCache(auth.currentUser.uid));
         }}><Download size={18}/>Export local copy</button>
-        <button className="border rounded-md p-3" onClick={() => void logout()}>Sign out</button>
+        {signedIn ? <button className="border rounded-md p-3" onClick={() => void logout()}>Sign out</button> : <GoogleAuthButton />}
       </> : !signedIn ? <GoogleAuthButton /> : null}
     </div>
   </main>;

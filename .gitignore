@@ -8,6 +8,7 @@ coverage/
 !.env.example
 
 .npm-cache/
+.wrangler/
 .test-build/
 .review-workspace
 *.service-account.json

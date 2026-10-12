@@ -15,8 +15,13 @@ test('popup, network and provider errors have distinct recovery messages', () =>
     ['auth/cancelled-popup-request', /cancelled/],
     ['auth/network-request-failed', /internet connection/],
     ['auth/operation-not-allowed', /enable Google/],
+    ['auth/invalid-api-key', /API key/],
+    ['auth/web-storage-unsupported', /browser storage/],
   ] as const) assert.match(signInErrorMessage({ code }, 'localhost'), expected);
   for (const error of [null, undefined, 'secret', { message: 'secret' }]) {
     assert.doesNotMatch(signInErrorMessage(error, 'localhost'), /secret/);
   }
+});
+test('production unauthorized-domain message identifies the exact Workers hostname', () => {
+  assert.match(signInErrorMessage({ code: 'auth/unauthorized-domain' }, 'upsc-atlas.ankeshk554.workers.dev'), /upsc-atlas\.ankeshk554\.workers\.dev/);
 });

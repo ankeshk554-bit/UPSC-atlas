@@ -1,5 +1,6 @@
 import { auth } from './auth';
 import { cachedArticle, cacheArticle } from './readerCache';
+import { requireApiJson } from '../../shared/apiResponse';
 
 export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const url = new URL(input instanceof Request ? input.url : String(input), window.location.origin);
@@ -18,7 +19,9 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
   };
   try {
     headers.set('X-Firebase-Token', await user.getIdToken());
-    const response = await fetch(input, { ...init, headers });
+    const raw = await fetch(input, { ...init, headers });
+    // Drive media downloads and Google DELETE operations can return non-JSON.
+    const response = url.pathname === '/api/google-proxy' ? raw : await requireApiJson(raw);
     if (auth.currentUser?.uid !== user.uid) throw new Error('Account changed.');
     if (articleUrl && response.ok) {
       const data = await response.clone().json();

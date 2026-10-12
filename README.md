@@ -13,6 +13,18 @@ Use Node.js 22.14+ (latest Node 22 recommended).
 
 The production build places browser assets in `dist/client` and the server in `dist/server`. Only the browser directory is served publicly. Set `HOST=0.0.0.0` and `PORT` when your hosting platform requires them. Terminate HTTPS at your host/reverse proxy.
 
+## Cloudflare Workers deployment
+
+The Workers site at `https://upsc-atlas.ankeshk554.workers.dev` needs both the browser assets and the Node backend. A static-assets-only deployment cannot open a workspace after Google sign-in: `/api/workspace` is an authenticated backend operation, not a browser asset.
+
+1. Deploy the Node app to a Node-capable host using `npm ci`, `npm run build`, and `npm start`. Use Node 22.14+ (Node 24 was also tested), `HOST=0.0.0.0`, and the host's assigned `PORT`. Configure the Firebase project/database and server credentials described below. Keep secrets only on the backend. Check its `/api/health` returns JSON `{"status":"ok"}` and an anonymous `/api/workspace` returns HTTP 401 JSON.
+2. In the Cloudflare Worker **Settings > Variables and Secrets**, set `API_ORIGIN` to that backend's HTTPS origin, e.g. `https://your-node-backend.example.com`. Use the actual backend origin with no path, query, credentials, or trailing API prefix; do not point it at the Workers site itself. No backend URL is committed because the correct deployment URL must come from the app owner.
+3. Build with `npm run build`, then deploy the Worker using the checked-in `wrangler.toml` (`npx wrangler deploy`, or a Cloudflare Workers Git build with build command `npm run build` and deploy command `npx wrangler deploy`). This configuration deploys `cloudflare/worker.ts` with `dist/client` as its asset binding. The Worker proxies `/api` and `/api/*` to the backend and serves browser routes as a SPA. Do not deploy only `dist/client` through Pages or overwrite the Worker with a static upload.
+4. In Firebase Console for `erudite-gantry-lszp9`, enable the Google sign-in provider and add **`upsc-atlas.ankeshk554.workers.dev`** to **Authentication > Settings > Authorized domains**. Keep the existing Firebase auth domain. If the browser key has HTTP-referrer restrictions in Google Cloud Console, allow `https://upsc-atlas.ankeshk554.workers.dev/*` and the Firebase auth helper domain. These console settings cannot be fixed by a Git commit.
+5. Verify the deployed Workers `/api/health` returns JSON, then use a real Google account to sign in, open the workspace, save a change, and reload it. Confirm sign-out/account switching keeps progress separate. Health alone does not validate Firebase server credentials or Firestore permissions.
+
+When `API_ORIGIN` is missing, invalid, unreachable, or serves HTML, the Worker returns an explicit JSON error instead of falling through to the SPA. Firebase tokens and Google access headers are forwarded only to the configured backend; upstream redirects are rejected. API responses are never cached. Browser access to the backend stays on the Workers origin, so browser CORS configuration is unnecessary.
+
 ## Credentials and Firebase
 
 - Revoke the previously committed DeepSeek key before deployment. Removing it from current source does not revoke it or remove it from Git history.

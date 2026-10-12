@@ -45,9 +45,12 @@ export async function openWorkspace(uid: string) {
   const generation = await closeWorkspace();
   if (generation !== session) throw new Error('Account changed. Please retry.');
   const local = validateWorkspace(await readAccountCache(uid));
-  const response = await apiFetch('/api/workspace');
+  const response = await apiFetch('/api/workspace', { signal: AbortSignal.timeout(30000) });
   if (!response.ok) throw new Error((await response.json()).error);
   const remote = await response.json();
+  if (!remote || !Number.isSafeInteger(remote.revision) || remote.revision < 0 || !remote.data || typeof remote.data !== 'object' || Array.isArray(remote.data)) {
+    throw new Error('The cloud service returned invalid workspace data. Please contact the app owner.');
+  }
   if (generation !== session) throw new Error('Account changed. Please retry.');
   revision = remote.revision;
   return { uid, remote: validateWorkspace(remote.data), local };

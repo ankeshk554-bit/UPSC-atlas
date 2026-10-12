@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Cloudflare Pages build script
 echo "Installing dependencies..."

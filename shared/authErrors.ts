@@ -12,6 +12,11 @@ export function signInErrorMessage(error: unknown, hostname: string): string {
       return 'Google sign-in is disabled for this app. The app owner must enable Google in Firebase Authentication > Sign-in method.';
     case 'auth/network-request-failed':
       return 'Google sign-in could not connect. Check your internet connection and try again.';
+    case 'auth/invalid-api-key':
+    case 'auth/api-key-not-valid.-please-pass-a-valid-api-key.':
+      return 'Google sign-in is not configured correctly. The app owner must check the Firebase browser API key and its restrictions.';
+    case 'auth/web-storage-unsupported':
+      return 'Google sign-in needs browser storage. Allow site data for this website, then try again.';
     default:
       return 'Google sign-in failed. Please try again. If it continues, contact the app owner.';
   }
